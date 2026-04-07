@@ -15,7 +15,7 @@ REPL_USER="replicator"
 REPL_PASS="repl1234"
 
 # TODO: Replace "project_db" with your actual database name
-DB_NAME="project_db"
+DB_NAME="pulsegrid_db"
 
 M="mysql  -h127.0.0.1    -P3306 -uroot -p${ROOT_PASS} --protocol=TCP --connect-timeout=5"
 S1="mysql -hmysql-slave1 -P3306 -uroot -p${ROOT_PASS} --protocol=TCP --connect-timeout=5"
@@ -58,26 +58,65 @@ $M -e "CREATE DATABASE ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_
 
 # TODO: Replace the SQL below with your actual table definitions
 $M ${DB_NAME} << 'SQL'
-CREATE TABLE users (
-  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  username     VARCHAR(40)  NOT NULL UNIQUE,
-  email        VARCHAR(120) NOT NULL UNIQUE,
-  passwordHash VARCHAR(255) NOT NULL,
-  role         ENUM('user','admin') DEFAULT 'user',
-  isActive     TINYINT(1)   DEFAULT 1,
-  createdAt    DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updatedAt    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+CREATE TABLE users(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+gamer_tag VARCHAR(30) NOT NULL UNIQUE,
+full_name VARCHAR(100) NOT NULL,
+email VARCHAR(100) NOT NULL UNIQUE,
+password_hash VARCHAR(255) NOT NULL,
+profile_image TEXT NULL,
+role ENUM('player','admin') NOT NULL DEFAULT 'player',
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- TODO: Replace "entities" with your domain table and its columns
-CREATE TABLE entities (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  userId      INT UNSIGNED NOT NULL,
-  status      ENUM('pending','active','completed','cancelled') DEFAULT 'pending',
-  createdAt   DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (userId) REFERENCES users(id)
+CREATE TABLE games(
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(100) NOT NULL UNIQUE,
+ logo TEXT NULL,
+ genre VARCHAR(50) NOT NULL,
+ max_players_per_team INT NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE teams(
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(80) NOT NULL,
+  tag VARCHAR(6) NOT NULL UNIQUE,
+  logo TEXT NULL,
+  description TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE team_members(
+ team_id INT UNSIGNED NOT NULL,
+ user_id INT UNSIGNED  NOT NULL,
+ role ENUM('captain', 'member') NOT NULL DEFAULT 'member',
+ joined_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (team_id, user_id),
+ CONSTRAINT fk_team_members_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+ CONSTRAINT fk_team_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tournaments(
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  game_id INT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  format ENUM('single_elimination', 'double_elimination','round_robin') NOT NULL,
+  max_teams INT NOT NULL,
+  registration_deadline DATETIME NOT NULL,
+  start_date DATETIME NOT NULL,
+  prize_pool DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  status ENUM('upcoming', 'registration_open','ongoing','completed','cancelled') NOT NULL DEFAULT 'upcoming',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_tournaments_game FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE RESTRICT
+);
+
+
 SQL
 
 MASTER_TABLES=$($M -s --skip-column-names \
