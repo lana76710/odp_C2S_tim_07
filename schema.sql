@@ -8,6 +8,7 @@ profile_image TEXT NULL,
 role ENUM('player','admin') NOT NULL DEFAULT 'player',
 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
 );
 
 CREATE TABLE games(
@@ -18,6 +19,8 @@ CREATE TABLE games(
  max_players_per_team INT NOT NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ CONSTRAINT chk_users_email CHECK (CHAR_LENGTH(email)>=5 AND email LIKE '%@%.%'),
+ CONSTRAINT chk_users_gamer_tag CHECK (CHAR_LENGTH(gamer_tag)>=3)
 );
 
 CREATE TABLE teams(
@@ -26,8 +29,12 @@ CREATE TABLE teams(
   tag VARCHAR(6) NOT NULL UNIQUE,
   logo TEXT NULL,
   description TEXT NULL,
+  captain_id INT UNSIGNED NULL,
+  created_by INT UNSIGNED NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_teams_captain FOREIGN KEY (captain_id) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_teams_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE team_members(
@@ -40,6 +47,7 @@ CREATE TABLE team_members(
  CONSTRAINT fk_team_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_team_members_user_id ON team_members(user_id);
 CREATE TABLE tournaments(
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   game_id INT UNSIGNED NOT NULL,
@@ -50,10 +58,18 @@ CREATE TABLE tournaments(
   start_date DATETIME NOT NULL,
   prize_pool DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   status ENUM('upcoming', 'registration_open','ongoing','completed','cancelled') NOT NULL DEFAULT 'upcoming',
+  created_by INT UNSIGNED NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_tournaments_game FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE RESTRICT
+  CONSTRAINT fk_tournaments_game FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_tournaments_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET,
+  CONSTRAINT chk_tournaments_max_teams CHECK (max_teams >= 2),
+  CONSTRAINT chk_tournaments_prize_pool CHECK (prize_pool >= 0),
+  CONSTRAINT chk_tournaments_dates CHECK (start_date>registration_deadline)
 );
+
+
+
 
 
 CREATE TABLE tournament_registrations (
@@ -69,7 +85,10 @@ ON DELETE CASCADE,
 CONSTRAINT fk_tournament_registrations_team
 FOREIGN KEY (team_id) REFERENCES teams(id)
 ON DELETE CASCADE
+CONSTRAINT chk_tournament_registrations_seed CHECK (seed IS NULL OR seed>0)
 );
+
+CREATE INDEX idx_tournament_registrations_team_id ON tournament_registrations(team_id);
 
 CREATE TABLE matches (
 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -96,7 +115,12 @@ ON DELETE SET NULL,
 CONSTRAINT fk_matches_winner
 FOREIGN KEY (winner_team_id) REFERENCES teams(id)
 ON DELETE SET NULL
+CONSTRAINT chk_matches_round_number CHECK (round_number>0),
+CONSTRAINT chk_matches_match_number CHECK (match_number>0),
+CONSTRAINT chk_matches_different_teams CHECK (team1_id IS NULL OR team2_id IS NULL)
 );
+
+CREATE INDEX idx_matches_tournament_id ON matches(tournament_id);
 
 CREATE TABLE match_players (
 match_id INT UNSIGNED NOT NULL,
@@ -114,6 +138,10 @@ CONSTRAINT fk_match_players_team
 FOREIGN KEY (team_id) REFERENCES teams(id)
 ON DELETE CASCADE
 );
+
+CREATE INDEX idx_match_players_user_id ON match_players(user_id);
+CREATE INDEX idx_match_players_team_id ON match_players(team_id);
+
 
 CREATE TABLE user_watchlist (
 user_id INT UNSIGNED NOT NULL,
@@ -147,6 +175,9 @@ FOREIGN KEY (invited_by_user_id) REFERENCES users(id)
 ON DELETE CASCADE
 );
 
+CREATE INDEX idx_team_invitations_invited_user_id ON team_invitations(invited_user_id);
+CREATE INDEX idx_team_invitations_team_id ON team_invitations(team_id);
+
 CREATE TABLE audit_logs (
 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 user_id INT UNSIGNED NULL,
@@ -159,3 +190,6 @@ CONSTRAINT fk_audit_logs_user
 FOREIGN KEY (user_id) REFERENCES users(id)
 ON DELETE SET NULL
 );
+
+CREATE INDEX idx_audit_logs_user_id on audit_logs(user_id);
+CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
