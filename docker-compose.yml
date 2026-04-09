@@ -19,7 +19,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 5s
-      timeout: 5s
+      timeout: 100s
       retries: 15
 
   # ── SLAVE 1 ────────────────────────────────────────────────
@@ -44,7 +44,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 5s
-      timeout: 5s
+      timeout: 100s
       retries: 15
 
   # ── SLAVE 2 ────────────────────────────────────────────────
@@ -69,7 +69,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
       interval: 5s
-      timeout: 5s
+      timeout: 100s
       retries: 15
 
 volumes:
