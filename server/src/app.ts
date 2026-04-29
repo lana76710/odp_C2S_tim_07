@@ -6,33 +6,33 @@ import { ConsoleLoggerService } from "./Services/logger/ConsoleLoggerService";
 import { DbManager } from "./Database/connection/DbConnectionPool";
 
 import { UserRepository } from "./Database/repositories/users/UserRepository";
-// import { GameRepository } from "./Database/repositories/games/GameRepository";   // TODO: Član 1
-// import { TeamRepository } from "./Database/repositories/teams/TeamRepository";   // TODO: Član 2
+import { GameRepository } from "./Database/repositories/games/GameRepository";
+import { AuditLogRepository } from "./Database/repositories/audit/AuditLogRepository";
 
-import { AuthService }   from "./Services/auth/AuthService";
-import { UserService }   from "./Services/users/UserService";
-// import { GameService }   from "./Services/games/GameService";   // TODO: Član 1
-// import { TeamService }   from "./Services/teams/TeamService";   // TODO: Član 2
+import { AuthService } from "./Services/auth/AuthService";
+import { UserService } from "./Services/users/UserService";
+import { GameService } from "./Services/games/GameService";
+import { AuditService } from "./Services/audit/AuditService";
 
-import { AuthController }   from "./WebAPI/controllers/AuthController";
-import { UserController }   from "./WebAPI/controllers/UserController";
-// import { GameController }   from "./WebAPI/controllers/GameController";   // TODO: Član 1
-// import { TeamController }   from "./WebAPI/controllers/TeamController";   // TODO: Član 2
+import { AuthController } from "./WebAPI/controllers/AuthController";
+import { UserController } from "./WebAPI/controllers/UserController";
+import { GameController } from "./WebAPI/controllers/GameController";
+import { AuditController } from "./WebAPI/controllers/AuditController";
 import { HealthController } from "./WebAPI/controllers/HealthController";
 
 export const logger = new ConsoleLoggerService();
 export const db     = new DbManager(logger);
 
 // Repositories
-const userRepo = new UserRepository(db, logger);
-//const gameRepo = new GameRepository(db, logger);
-//const teamRepo = new TeamRepository(db, logger);
+const userRepo  = new UserRepository(db, logger);
+const gameRepo  = new GameRepository(db, logger);
+const auditRepo = new AuditLogRepository(db, logger);
 
 // Services
-const authService = new AuthService(userRepo);
-const userService = new UserService(userRepo);
-//const gameService = new GameService(gameRepo);
-//const teamService = new TeamService(teamRepo);
+const authService  = new AuthService(userRepo);
+const userService  = new UserService(userRepo);
+const gameService  = new GameService(gameRepo);
+const auditService = new AuditService(auditRepo);
 
 // Express
 const app = express();
@@ -42,7 +42,7 @@ app.use(express.json());
 app.use("/api/v1", new HealthController(db).getRouter());
 app.use("/api/v1", new AuthController(authService).getRouter());
 app.use("/api/v1", new UserController(userService).getRouter());
-//app.use("/api/v1", new GameController(gameService).getRouter());
-//app.use("/api/v1", new TeamController(teamService).getRouter());
+app.use("/api/v1", new GameController(gameService, auditService).getRouter());
+app.use("/api/v1", new AuditController(auditService).getRouter());
 
 export default app;
