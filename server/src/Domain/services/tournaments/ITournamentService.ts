@@ -9,4 +9,7 @@ export interface ITournamentService {
   create(dto: CreateTournamentDto): Promise<TournamentDto | null>;
   update(id: number, dto: Partial<CreateTournamentDto>): Promise<TournamentDto | null>;
   delete(id: number): Promise<boolean>;
+  watch(userId: number, tournamentId: number): Promise<boolean>;
+  unwatch(userId: number, tournamentId: number): Promise<boolean>;
+  getWatchlist(userId: number): Promise<TournamentDto[]>;
 }

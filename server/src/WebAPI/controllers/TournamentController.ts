@@ -13,6 +13,8 @@ export class TournamentController {
     this.router.post("/tournaments",    authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
     this.router.put("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.update.bind(this));
     this.router.delete("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
+    this.router.post("/tournaments/:id/watch",    authenticate, this.watch.bind(this));
+this.router.delete("/tournaments/:id/watch",  authenticate, this.unwatch.bind(this));
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -56,4 +58,18 @@ export class TournamentController {
   }
 
   public getRouter(): Router { return this.router; }
+
+  private async watch(req: Request, res: Response): Promise<void> {
+  const tournamentId = parseInt(req.params.id as string, 10);
+  if (isNaN(tournamentId)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
+  const ok = await this.tournamentService.watch(req.user!.id, tournamentId);
+  res.status(ok ? 200 : 500).json({ success: ok });
+}
+
+private async unwatch(req: Request, res: Response): Promise<void> {
+  const tournamentId = parseInt(req.params.id as string, 10);
+  if (isNaN(tournamentId)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
+  const ok = await this.tournamentService.unwatch(req.user!.id, tournamentId);
+  res.status(ok ? 200 : 404).json({ success: ok });
+}
 }
