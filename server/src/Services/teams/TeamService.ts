@@ -61,12 +61,25 @@ export class TeamService {
     return this.repo.removeMember(teamId, targetUserId);
   }
 
-  async transferCaptain(teamId: number, oldCaptainId: number, newCaptainId: number) {
+   async transferCaptain(teamId: number, oldCaptainId: number, newCaptainId: number) {
     const isCaptain = await this.repo.isCaptain(teamId, oldCaptainId);
     if (!isCaptain) {
       throw new Error("Only captain can transfer ownership");
     }
 
+    const isMember = await this.repo.isMember(teamId, newCaptainId);
+    if (!isMember) {
+      throw new Error("New captain must be team member");
+    }
+
     return this.repo.transferCaptain(teamId, oldCaptainId, newCaptainId);
+  }
+
+  async updateTeam(teamId: number, name: string, tag: string, description: string | null) {
+    return this.repo.updateTeam(teamId, name, tag, description);
+  }
+
+  async getTeamMembers(teamId: number) {
+    return this.repo.getTeamMembers(teamId);
   }
 }
