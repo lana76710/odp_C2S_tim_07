@@ -55,7 +55,7 @@ export class TeamController {
     try {
       const teamId = Number(req.params.id);
 
-      await service.deleteTeam(teamId);
+      await service.deleteTeam(teamId, req.user!.id);
 
       res.status(204).send();
     } catch (error) {
@@ -95,7 +95,7 @@ export class TeamController {
       const teamId = Number(req.params.id);
       const { name, tag, description } = req.body;
 
-      await service.updateTeam(teamId, name, tag, description);
+      await service.updateTeam(teamId, name, tag, description, req.user!.id);
 
       res.status(200).json({ success: true });
     } catch (error) {
