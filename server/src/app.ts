@@ -24,6 +24,7 @@ import { TournamentRepository } from "./Database/repositories/tournaments/Tourna
 import { TournamentService }    from "./Services/tournaments/TournamentService";
 import { TournamentController } from "./WebAPI/controllers/TournamentController";
 import { WatchlistRepository } from "./Database/repositories/watchlist/WatchlistRepository";
+import { TournamentRegistrationRepository } from "./Database/repositories/registrations/TournamentRegistrationRepository";
 
 
 export const logger = new ConsoleLoggerService();
@@ -33,13 +34,14 @@ export const db     = new DbManager(logger);
 const userRepo = new UserRepository(db, logger);
 const tournamentRepo = new TournamentRepository(db, logger);
 const watchlistRepo = new WatchlistRepository(db, logger);
+const registrationRepo = new TournamentRegistrationRepository(db, logger);
 //const gameRepo = new GameRepository(db, logger);
 //const teamRepo = new TeamRepository(db, logger);
 
 // Services
 const authService = new AuthService(userRepo);
 const userService = new UserService(userRepo);
-const tournamentService = new TournamentService(tournamentRepo, watchlistRepo);
+const tournamentService = new TournamentService(tournamentRepo, watchlistRepo, registrationRepo);
 //const gameService = new GameService(gameRepo);
 //const teamService = new TeamService(teamRepo);
 
