@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 
+
 import LoginPage    from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
@@ -8,6 +9,9 @@ import NotFoundPage from "./pages/not_found/NotFoundPage";
 import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
+import TeamsPage from "./pages/TeamsPage";
+import TeamDetailsPage from "./pages/TeamDetailsPage";
+
 
 export default function App() {
   return (
@@ -23,6 +27,22 @@ export default function App() {
       <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><UsersPage /></ProtectedRoute>} />
 
       <Route path="/"    element={<Navigate to="/login" replace />} />
+      <Route
+  path="/teams"
+  element={
+    <ProtectedRoute requiredRole="user">
+      <TeamsPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/teams/:id"
+  element={
+    <ProtectedRoute requiredRole="user">
+      <TeamDetailsPage />
+    </ProtectedRoute>
+  }
+/>
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*"    element={<Navigate to="/404" replace />} />
     </Routes>
