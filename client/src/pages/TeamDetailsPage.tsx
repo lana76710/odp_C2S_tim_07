@@ -14,7 +14,12 @@ export default function TeamDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   const [invitedUserId, setInvitedUserId] = useState("");
+  const [invitationId, setInvitationId] = useState("");
   const [newCaptainId, setNewCaptainId] = useState("");
+
+  const [editName, setEditName] = useState("");
+  const [editTag, setEditTag] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     async function loadTeamData() {
@@ -28,6 +33,9 @@ export default function TeamDetailsPage() {
 
       if (teamResult.success && teamResult.data) {
         setTeam(teamResult.data);
+        setEditName(teamResult.data.name);
+        setEditTag(teamResult.data.tag);
+        setEditDescription(teamResult.data.description ?? "");
       }
 
       if (membersResult.success && membersResult.data) {
@@ -48,6 +56,39 @@ export default function TeamDetailsPage() {
     }
   }
 
+  async function handleUpdateTeam() {
+    if (editName.trim().length < 2) {
+      alert("Team name must contain at least 2 characters");
+      return;
+    }
+
+    if (!/^[A-Z0-9]{2,6}$/.test(editTag.trim())) {
+      alert("Tag must contain 2-6 uppercase letters or numbers");
+      return;
+    }
+
+    const result = await TeamsAPIService.updateTeam(teamId, {
+      name: editName.trim(),
+      tag: editTag.trim(),
+      description: editDescription.trim() || null
+    });
+
+    if (result.success) {
+      const teamResult = await TeamsAPIService.getTeam(teamId);
+
+      if (teamResult.success && teamResult.data) {
+        setTeam(teamResult.data);
+        setEditName(teamResult.data.name);
+        setEditTag(teamResult.data.tag);
+        setEditDescription(teamResult.data.description ?? "");
+      }
+
+      alert("Team updated");
+    } else {
+      alert(result.message);
+    }
+  }
+
   async function handleInviteUser() {
     const userId = Number(invitedUserId);
 
@@ -61,6 +102,25 @@ export default function TeamDetailsPage() {
     if (result.success) {
       alert("Invitation sent");
       setInvitedUserId("");
+    } else {
+      alert(result.message);
+    }
+  }
+
+  async function handleRespondToInvite(status: "accepted" | "rejected") {
+    const inviteId = Number(invitationId);
+
+    if (!Number.isInteger(inviteId) || inviteId <= 0) {
+      alert("Enter valid invitation ID");
+      return;
+    }
+
+    const result = await TeamsAPIService.respondToInvite(teamId, inviteId, status);
+
+    if (result.success) {
+      alert(`Invitation ${status}`);
+      setInvitationId("");
+      await refreshMembers();
     } else {
       alert(result.message);
     }
@@ -155,6 +215,39 @@ export default function TeamDetailsPage() {
 
         <section style={styles.actionsGrid}>
           <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Edit team</h2>
+
+            <input
+              type="text"
+              placeholder="Team name"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              style={styles.input}
+            />
+
+            <input
+              type="text"
+              placeholder="TAG"
+              value={editTag}
+              onChange={(e) => setEditTag(e.target.value.toUpperCase())}
+              style={styles.input}
+              maxLength={6}
+            />
+
+            <input
+              type="text"
+              placeholder="Description"
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              style={styles.input}
+            />
+
+            <button onClick={() => void handleUpdateTeam()} style={styles.primaryButton}>
+              Save Changes
+            </button>
+          </div>
+
+          <div style={styles.card}>
             <h2 style={styles.cardTitle}>Invite player</h2>
 
             <input
@@ -167,6 +260,32 @@ export default function TeamDetailsPage() {
 
             <button onClick={() => void handleInviteUser()} style={styles.primaryButton}>
               Send Invitation
+            </button>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Respond to invitation</h2>
+
+            <input
+              type="number"
+              placeholder="Invitation ID"
+              value={invitationId}
+              onChange={(e) => setInvitationId(e.target.value)}
+              style={styles.input}
+            />
+
+            <button
+              onClick={() => void handleRespondToInvite("accepted")}
+              style={styles.primaryButton}
+            >
+              Accept Invite
+            </button>
+
+            <button
+              onClick={() => void handleRespondToInvite("rejected")}
+              style={styles.rejectButton}
+            >
+              Reject Invite
             </button>
           </div>
 
@@ -319,7 +438,7 @@ const styles = {
   },
   actionsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
     gap: "20px",
     marginBottom: "32px"
   },
@@ -353,6 +472,17 @@ const styles = {
     borderRadius: "999px",
     padding: "13px 18px",
     background: "linear-gradient(135deg, #22d3ee, #6366f1)",
+    color: "white",
+    fontWeight: 900,
+    cursor: "pointer"
+  },
+  rejectButton: {
+    width: "100%",
+    border: 0,
+    borderRadius: "999px",
+    padding: "13px 18px",
+    marginTop: "12px",
+    background: "linear-gradient(135deg, #f97316, #ef4444)",
     color: "white",
     fontWeight: 900,
     cursor: "pointer"
@@ -403,7 +533,8 @@ const styles = {
   memberCard: {
     padding: "22px",
     borderRadius: "24px",
-    background: "linear-gradient(145deg, rgba(30,41,59,0.96), rgba(15,23,42,0.96))",
+    background:
+      "linear-gradient(145deg, rgba(30,41,59,0.96), rgba(15,23,42,0.96))",
     border: "1px solid rgba(255,255,255,0.1)"
   },
   memberName: {

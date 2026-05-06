@@ -39,7 +39,7 @@ export default function App() {
       <Route path="/admin/audit"    element={<ProtectedRoute requiredRole="admin"><AdminAuditPage /></ProtectedRoute>} />
 
       <Route path="/"    element={<Navigate to="/login" replace />} />
-      <Route
+<Route
   path="/teams"
   element={
     <ProtectedRoute requiredRole="user">
@@ -47,6 +47,7 @@ export default function App() {
     </ProtectedRoute>
   }
 />
+
 <Route
   path="/teams/:id"
   element={
@@ -59,4 +60,7 @@ export default function App() {
       <Route path="*"    element={<Navigate to="/404" replace />} />
     </Routes>
   );
+
 }
+
+
