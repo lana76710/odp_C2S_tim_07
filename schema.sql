@@ -1,4 +1,5 @@
 CREATE TABLE users(
+
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   gamer_tag VARCHAR(30) NOT NULL UNIQUE,
   full_name VARCHAR(100) NOT NULL,
@@ -20,8 +21,31 @@ CREATE TABLE games(
   max_players_per_team INT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+gamer_tag VARCHAR(30) NOT NULL UNIQUE,
+full_name VARCHAR(100) NOT NULL,
+email VARCHAR(100) NOT NULL UNIQUE,
+password_hash VARCHAR(255) NOT NULL,
+profile_image TEXT NULL,
+role ENUM('player','admin') NOT NULL DEFAULT 'player',
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CONSTRAINT chk_users_email CHECK (CHAR_LENGTH(email)>=5 AND email LIKE '%@%.%'),
+CONSTRAINT chk_users_gamer_tag CHECK (CHAR_LENGTH(gamer_tag)>=3)
 );
 
+CREATE TABLE games(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL UNIQUE,
+logo TEXT NULL,
+genre VARCHAR(50) NOT NULL,
+max_players_per_team INT NOT NULL,
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CONSTRAINT chk_games_max_players CHECK (max_players_per_team > 0)
+
+);
 CREATE TABLE teams(
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(80) NOT NULL,
@@ -69,6 +93,7 @@ CREATE TABLE tournaments(
 );
 
 CREATE TABLE tournament_registrations (
+
   tournament_id INT UNSIGNED NOT NULL,
   team_id INT UNSIGNED NOT NULL,
   registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -78,11 +103,26 @@ CREATE TABLE tournament_registrations (
   CONSTRAINT fk_tournament_registrations_tournament FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
   CONSTRAINT fk_tournament_registrations_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
   CONSTRAINT chk_tournament_registrations_seed CHECK (seed IS NULL OR seed>0)
+tournament_id INT UNSIGNED NOT NULL,
+team_id INT UNSIGNED NOT NULL,
+registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+status ENUM('pending', 'confirmed', 'disqualified') NOT NULL DEFAULT 'pending',
+seed INT NULL,
+PRIMARY KEY (tournament_id, team_id),
+CONSTRAINT fk_tournament_registrations_tournament
+FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
+ON DELETE CASCADE,
+CONSTRAINT fk_tournament_registrations_team
+FOREIGN KEY (team_id) REFERENCES teams(id)
+ON DELETE CASCADE,
+CONSTRAINT chk_tournament_registrations_seed CHECK (seed IS NULL OR seed > 0)
+
 );
 
 CREATE INDEX idx_tournament_registrations_team_id ON tournament_registrations(team_id);
 
 CREATE TABLE matches (
+
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tournament_id INT UNSIGNED NOT NULL,
   round_number INT NOT NULL,
@@ -101,6 +141,37 @@ CREATE TABLE matches (
   CONSTRAINT fk_matches_winner FOREIGN KEY (winner_team_id) REFERENCES teams(id) ON DELETE SET NULL,
   CONSTRAINT chk_matches_round_number CHECK (round_number>0),
   CONSTRAINT chk_matches_match_number CHECK (match_number>0)
+
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+tournament_id INT UNSIGNED NOT NULL,
+round_number INT NOT NULL,
+match_number INT NOT NULL,
+team1_id INT UNSIGNED NULL,
+team2_id INT UNSIGNED NULL,
+winner_team_id INT UNSIGNED NULL,
+score VARCHAR(10) NULL,
+status ENUM('scheduled', 'ongoing', 'completed') NOT NULL DEFAULT 'scheduled',
+scheduled_at DATETIME NULL,
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CONSTRAINT fk_matches_tournament
+FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
+ON DELETE CASCADE,
+CONSTRAINT fk_matches_team1
+FOREIGN KEY (team1_id) REFERENCES teams(id)
+ON DELETE SET NULL,
+CONSTRAINT fk_matches_team2
+FOREIGN KEY (team2_id) REFERENCES teams(id)
+ON DELETE SET NULL,
+CONSTRAINT fk_matches_winner
+FOREIGN KEY (winner_team_id) REFERENCES teams(id)
+ON DELETE SET NULL,
+CONSTRAINT chk_matches_round_number CHECK (round_number>0),
+CONSTRAINT chk_matches_match_number CHECK (match_number>0),
+CONSTRAINT chk_matches_different_teams CHECK (
+  team1_id IS NULL OR team2_id IS NULL OR team1_id <> team2_id
+)
+
 );
 
 CREATE INDEX idx_matches_tournament_id ON matches(tournament_id);
