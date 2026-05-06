@@ -24,20 +24,19 @@ export class AuditLogRepository implements IAuditLogRepository {
   }
 
   async findAll(page: number, limit: number): Promise<AuditLogDto[]> {
+    console.log("FINDALL CALLED", page, limit);
     const res = await this.db.getReadConnection();
+    console.log("CONNECTION:", res ? "OK" : "NULL");
     if (!res) return [];
     const offset = (page - 1) * limit;
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT a.*, u.gamer_tag
-         FROM audit_logs a
-         LEFT JOIN users u ON u.id = a.user_id
-         ORDER BY a.created_at DESC
-         LIMIT ? OFFSET ?`,
-        [limit, offset],
-      );
+      const sql = `SELECT a.*, u.gamer_tag FROM audit_logs a LEFT JOIN users u ON u.id = a.user_id ORDER BY a.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+      console.log("SQL:", sql);
+      const [rows] = await res.conn.execute<RowDataPacket[]>(sql);
+      console.log("ROWS:", rows.length);
       return rows.map((r) => this.map(r));
     } catch (err) {
+      console.log("ERROR:", err);
       this.logger.error("AuditLogRepository", "findAll failed", err);
       return [];
     } finally { res.conn.release(); }

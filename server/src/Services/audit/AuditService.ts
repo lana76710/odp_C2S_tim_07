@@ -9,10 +9,12 @@ export class AuditService implements IAuditService {
     page: number,
     limit: number,
   ): Promise<{ logs: AuditLogDto[]; total: number }> {
+    console.log("AuditService.getLogs called", page, limit);
     const [logs, total] = await Promise.all([
       this.auditRepo.findAll(page, limit),
       this.auditRepo.countAll(),
     ]);
+    console.log("AuditService.getLogs result", logs.length, total);
     return { logs, total };
   }
 
