@@ -145,5 +145,4 @@ export class DbManager {
   public getNodes(): DbNode[] { return [this.master.node, ...this.slaves.map((s) => s.node)]; }
   public getSlaveRrIndex(): number { return this.slaveRrIndex; }
   public stop(): void { if (this.healthTimer) clearInterval(this.healthTimer); }
-
 }
