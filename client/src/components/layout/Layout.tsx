@@ -5,6 +5,11 @@ import { useAuth } from "../../hooks/auth/useAuthHook";
 const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: "⬡" },
   { to: "/games",     label: "Games",     icon: "◈" },
+  {
+  label: "Teams",
+  to: "/teams",
+  icon: "⚡"
+}
 ];
 
 const adminNav = [

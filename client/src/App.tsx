@@ -29,7 +29,7 @@ export default function App() {
       <Route path="/games" element={<GamesPage />} />
 
       {/* User routes */}
-      <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><UserDashboard /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute requiredRole="player"><UserDashboard /></ProtectedRoute>} />
 
       {/* Admin routes */}
       <Route path="/admin"          element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
@@ -42,7 +42,7 @@ export default function App() {
 <Route
   path="/teams"
   element={
-    <ProtectedRoute requiredRole="user">
+    <ProtectedRoute requiredRole="player">
       <TeamsPage />
     </ProtectedRoute>
   }
@@ -51,7 +51,7 @@ export default function App() {
 <Route
   path="/teams/:id"
   element={
-    <ProtectedRoute requiredRole="user">
+    <ProtectedRoute requiredRole="player">
       <TeamDetailsPage />
     </ProtectedRoute>
   }
