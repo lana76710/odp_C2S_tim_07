@@ -1,7 +1,7 @@
 import axios from "axios";
 import { readItem } from "../../helpers/local_storage";
 
-const BASE = import.meta.env.VITE_API_URL + "health";
+const BASE = "/api/v1/health";
 
 const authHeader = () => {
   const token = readItem("authToken");

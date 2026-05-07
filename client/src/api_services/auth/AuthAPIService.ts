@@ -16,6 +16,7 @@ async login(gamer_tag, password) {
 
       if (response.success && response.data) {
         localStorage.setItem("token", response.data);
+        localStorage.setItem("authToken", response.data);
       }
 
       return response;

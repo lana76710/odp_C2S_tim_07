@@ -2,7 +2,7 @@ import axios from "axios";
 import type { GameDto, CreateGameDto } from "../../models/game/GameTypes";
 import { readItem } from "../../helpers/local_storage";
 
-const BASE = import.meta.env.VITE_API_URL + "games";
+const BASE = "/api/v1/games";
 
 const authHeader = () => {
   const token = readItem("authToken");

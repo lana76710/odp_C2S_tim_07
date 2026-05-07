@@ -5,7 +5,7 @@ import type {
   TeamDto,
   TeamMemberDto
 } from "../../models/team/TeamTypes";
-const API_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/v1/teams`;
+const API_URL = "/api/v1/teams";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("authToken");
