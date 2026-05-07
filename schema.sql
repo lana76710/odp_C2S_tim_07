@@ -60,3 +60,18 @@ CREATE TABLE team_members (
 );
 
 CREATE INDEX idx_team_members_user_id ON team_members(user_id);
+CREATE TABLE team_invitations (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  team_id INT UNSIGNED NOT NULL,
+  invited_user_id INT UNSIGNED NOT NULL,
+  invited_by_user_id INT UNSIGNED NOT NULL,
+  status ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  responded_at DATETIME NULL,
+  CONSTRAINT fk_team_invitations_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+  CONSTRAINT fk_team_invitations_invited_user FOREIGN KEY (invited_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_team_invitations_invited_by FOREIGN KEY (invited_by_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_team_invitations_invited_user_id ON team_invitations(invited_user_id);
+CREATE INDEX idx_team_invitations_team_id ON team_invitations(team_id);

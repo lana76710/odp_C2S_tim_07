@@ -71,6 +71,8 @@ app.use("/api/v1", new AuthController(authService).getRouter());
 app.use("/api/v1", new UserController(userService).getRouter());
 
 app.post("/api/v1/teams", authenticate, (req, res) => teamController.createTeam(req, res));
+app.get("/api/v1/teams/:id/members", authenticate, (req, res) => teamController.getTeamMembers(req, res));
+
 app.get("/api/v1/teams", authenticate, (req, res) => teamController.getMyTeams(req, res));
 app.get("/api/v1/teams/:id", authenticate, (req, res) => teamController.getTeam(req, res));
 app.delete("/api/v1/teams/:id", authenticate, (req, res) => teamController.deleteTeam(req, res));
@@ -84,7 +86,6 @@ app.post("/api/v1/teams/:id/invite", authenticate, (req, res) => teamController.
 app.post("/api/v1/teams/:id/invite/respond", authenticate, (req, res) => teamController.respondToInvite(req, res));
 
 app.put("/api/v1/teams/:id", authenticate, (req, res) => teamController.updateTeam(req, res));
-app.get("/api/v1/teams/:id/members", authenticate, (req, res) => teamController.getTeamMembers(req, res));
 
 app.delete("/api/v1/teams/:id/leave", authenticate, (req, res) => teamController.leaveTeam(req, res));
 app.delete("/api/v1/teams/:id/members/:userId", authenticate, (req, res) => teamController.kickMember(req, res));

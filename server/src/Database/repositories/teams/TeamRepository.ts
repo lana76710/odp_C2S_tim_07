@@ -68,12 +68,13 @@ export class TeamRepository {
 
       await writeConnection.conn.commit();
       return teamId;
-    } catch {
-      await writeConnection.conn.rollback();
-      return null;
-    } finally {
-      writeConnection.conn.release();
-    }
+} catch (error) {
+  console.error("CREATE TEAM DB ERROR:", error);
+  await writeConnection.conn.rollback();
+  return null;
+} finally {
+  writeConnection.conn.release();
+}
   }
 
   async getUserTeams(userId: number): Promise<RowDataPacket[]> {
@@ -136,9 +137,9 @@ export class TeamRepository {
 
   async isCaptain(teamId: number, userId: number): Promise<boolean> {
     const rows = await this.selectRows(
-      `SELECT id
-       FROM team_members
-       WHERE team_id = ? AND user_id = ? AND role = 'captain'`,
+      `SELECT team_id
+ FROM team_members
+ WHERE team_id = ? AND user_id = ? AND role = 'captain'`,
       [teamId, userId]
     );
 
@@ -147,9 +148,9 @@ export class TeamRepository {
 
   async isMember(teamId: number, userId: number): Promise<boolean> {
     const rows = await this.selectRows(
-      `SELECT id
-       FROM team_members
-       WHERE team_id = ? AND user_id = ?`,
+    `SELECT id
+ FROM team_members
+ WHERE team_id = ? AND user_id = ?`,
       [teamId, userId]
     );
 

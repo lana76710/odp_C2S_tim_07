@@ -3,74 +3,63 @@ import { useNavigate } from "react-router-dom";
 import { TeamsAPIService } from "../api_services/teams/TeamsAPIService";
 import type { TeamDto } from "../models/team/TeamTypes";
 
+
+
 export default function TeamsPage() {
   const navigate = useNavigate();
 
   const [teams, setTeams] = useState<TeamDto[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
-
   useEffect(() => {
-    async function fetchTeams() {
-      const result = await TeamsAPIService.getMyTeams();
+  async function loadTeams() {
+    const result = await TeamsAPIService.getMyTeams();
 
-      if (result.success && result.data) {
-        setTeams(result.data);
-      }
-
-      setLoading(false);
+    if (result.success && result.data) {
+      setTeams(result.data);
     }
-
-    void fetchTeams();
-  }, []);
-
-  async function handleCreateTeam() {
-    if (name.trim().length < 2) {
-      alert("Team name must contain at least 2 characters");
-      return;
-    }
-
-    if (!/^[A-Z0-9]{2,6}$/.test(tag.trim())) {
-      alert("Tag must contain 2-6 uppercase letters or numbers");
-      return;
-    }
-
-    setCreating(true);
-
-    const result = await TeamsAPIService.createTeam({
-      name: name.trim(),
-      tag: tag.trim(),
-      description: description.trim() || null
-    });
-
-    if (result.success) {
-      setName("");
-      setTag("");
-      setDescription("");
-
-      const teamsResult = await TeamsAPIService.getMyTeams();
-
-      if (teamsResult.success && teamsResult.data) {
-        setTeams(teamsResult.data);
-      }
-    } else {
-      alert(result.message);
-    }
-
-    setCreating(false);
   }
 
-  if (loading) {
-    return (
-      <main style={styles.page}>
-        <div style={styles.loaderCard}>Loading teams...</div>
-      </main>
-    );
+  void loadTeams();
+}, []);
+
+async function handleCreateTeam() {
+  if (name.trim().length < 2) {
+    alert("Team name must contain at least 2 characters");
+    return;
   }
+
+  if (!/^[A-Z0-9]{2,6}$/.test(tag.trim())) {
+    alert("Tag must contain 2-6 uppercase letters or numbers");
+    return;
+  }
+
+  setCreating(true);
+
+  const result = await TeamsAPIService.createTeam({
+    name: name.trim(),
+    tag: tag.trim(),
+    description: description.trim() || null
+  });
+
+  if (result.success) {
+    const teamsResult = await TeamsAPIService.getMyTeams();
+
+    if (teamsResult.success && teamsResult.data) {
+      setTeams(teamsResult.data);
+    }
+
+    setName("");
+    setTag("");
+    setDescription("");
+  } else {
+    alert(result.message);
+  }
+
+  setCreating(false);
+}
 
   return (
     <main style={styles.page}>
@@ -78,7 +67,9 @@ export default function TeamsPage() {
         <section style={styles.hero}>
           <div>
             <p style={styles.eyebrow}>Pulse Teams</p>
+
             <h1 style={styles.title}>Build your squad</h1>
+
             <p style={styles.subtitle}>
               Create teams, organize players and manage your roster from one place.
             </p>
@@ -86,6 +77,7 @@ export default function TeamsPage() {
 
           <div style={styles.statCard}>
             <span style={styles.statNumber}>{teams.length}</span>
+
             <span style={styles.statLabel}>active teams</span>
           </div>
         </section>
@@ -96,6 +88,7 @@ export default function TeamsPage() {
           <div style={styles.formGrid}>
             <label style={styles.label}>
               Team name
+
               <input
                 type="text"
                 placeholder="Alpha Squad"
@@ -107,6 +100,7 @@ export default function TeamsPage() {
 
             <label style={styles.label}>
               Tag
+
               <input
                 type="text"
                 placeholder="ALPHA"
@@ -120,6 +114,7 @@ export default function TeamsPage() {
 
           <label style={styles.label}>
             Description
+
             <textarea
               placeholder="Describe your team..."
               value={description}
@@ -147,6 +142,7 @@ export default function TeamsPage() {
           {teams.length === 0 ? (
             <div style={styles.emptyState}>
               <h3 style={styles.emptyTitle}>No teams yet</h3>
+
               <p style={styles.emptyText}>
                 Create your first team using the form above.
               </p>
@@ -157,6 +153,7 @@ export default function TeamsPage() {
                 <article key={team.id} style={styles.teamCard}>
                   <div style={styles.teamHeader}>
                     <span style={styles.badge}>{team.tag}</span>
+
                     <span style={styles.teamId}>#{team.id}</span>
                   </div>
 
@@ -168,7 +165,8 @@ export default function TeamsPage() {
 
                   <div style={styles.teamFooter}>
                     <span>Captain ID: {team.captain_id}</span>
-                    <span>{team.created_at?.slice(0, 10)}</span>
+
+                    <span>{team.created_at.slice(0, 10)}</span>
                   </div>
 
                   <button
@@ -193,27 +191,18 @@ const styles = {
     width: "100%",
     display: "flex",
     justifyContent: "center",
-    padding: "60px 22px",
+    padding: "40px 22px",
     color: "#f8fafc",
     fontFamily: "Inter, Arial, sans-serif",
-    background:
-      "radial-gradient(circle at 15% 10%, rgba(168,85,247,0.38), transparent 28%), radial-gradient(circle at 85% 20%, rgba(14,165,233,0.32), transparent 28%), radial-gradient(circle at 50% 100%, rgba(236,72,153,0.22), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 45%, #111827 100%)"
+    background: "transparent"
   },
+
   shell: {
     width: "100%",
     maxWidth: "1120px",
     margin: "0 auto"
   },
-  loaderCard: {
-    marginTop: "140px",
-    padding: "24px 34px",
-    borderRadius: "24px",
-    background: "rgba(15, 23, 42, 0.78)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
-    fontSize: "20px",
-    fontWeight: 800
-  },
+
   hero: {
     display: "flex",
     justifyContent: "space-between",
@@ -221,6 +210,7 @@ const styles = {
     gap: "28px",
     marginBottom: "30px"
   },
+
   eyebrow: {
     color: "#a5b4fc",
     textTransform: "uppercase" as const,
@@ -228,6 +218,7 @@ const styles = {
     fontWeight: 900,
     marginBottom: "12px"
   },
+
   title: {
     fontSize: "66px",
     fontWeight: 950,
@@ -237,6 +228,7 @@ const styles = {
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent"
   },
+
   subtitle: {
     maxWidth: "620px",
     color: "#cbd5e1",
@@ -244,51 +236,55 @@ const styles = {
     marginTop: "18px",
     lineHeight: 1.6
   },
+
   statCard: {
     minWidth: "180px",
     padding: "28px",
     borderRadius: "28px",
     background: "rgba(255,255,255,0.1)",
     border: "1px solid rgba(255,255,255,0.18)",
-    textAlign: "center" as const,
-    boxShadow: "0 28px 80px rgba(0,0,0,0.35)",
-    backdropFilter: "blur(16px)"
+    textAlign: "center" as const
   },
+
   statNumber: {
     display: "block",
     fontSize: "52px",
     fontWeight: 950
   },
+
   statLabel: {
     color: "#cbd5e1",
     fontWeight: 700
   },
+
   card: {
     width: "100%",
     padding: "34px",
     borderRadius: "30px",
     background: "rgba(15, 23, 42, 0.78)",
-    backdropFilter: "blur(20px)",
     border: "1px solid rgba(255,255,255,0.14)",
-    boxShadow: "0 35px 100px rgba(0,0,0,0.42)",
     marginBottom: "38px"
   },
+
   cardTitle: {
     marginTop: 0,
     marginBottom: "22px",
     fontSize: "28px"
   },
+
   formGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 240px",
     gap: "18px"
   },
+
   label: {
     display: "block",
     color: "#e2e8f0",
     fontWeight: 800,
     marginBottom: "16px"
   },
+
   input: {
     display: "block",
     width: "100%",
@@ -299,9 +295,9 @@ const styles = {
     background: "rgba(255,255,255,0.09)",
     color: "#f8fafc",
     outline: "none",
-    boxSizing: "border-box" as const,
-    fontSize: "15px"
+    boxSizing: "border-box" as const
   },
+
   textarea: {
     display: "block",
     width: "100%",
@@ -314,9 +310,9 @@ const styles = {
     color: "#f8fafc",
     outline: "none",
     resize: "vertical" as const,
-    boxSizing: "border-box" as const,
-    fontSize: "15px"
+    boxSizing: "border-box" as const
   },
+
   button: {
     border: 0,
     borderRadius: "999px",
@@ -324,65 +320,72 @@ const styles = {
     background: "linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4)",
     color: "white",
     fontWeight: 900,
-    fontSize: "15px",
-    boxShadow: "0 16px 38px rgba(59,130,246,0.42)"
+    fontSize: "15px"
   },
+
   teamsSection: {
     width: "100%"
   },
+
   sectionTitle: {
     marginBottom: "18px",
     fontSize: "28px"
   },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px"
   },
+
   teamCard: {
     padding: "26px",
     borderRadius: "28px",
     background:
       "linear-gradient(145deg, rgba(30,41,59,0.96), rgba(15,23,42,0.96))",
-    border: "1px solid rgba(255,255,255,0.1)",
-    boxShadow: "0 22px 60px rgba(0,0,0,0.32)"
+    border: "1px solid rgba(255,255,255,0.1)"
   },
+
   teamHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "20px"
   },
+
   badge: {
     padding: "7px 12px",
     borderRadius: "999px",
     background:
       "linear-gradient(135deg, rgba(139,92,246,0.45), rgba(59,130,246,0.35))",
     color: "#e0e7ff",
-    fontWeight: 900,
-    letterSpacing: "0.09em"
+    fontWeight: 900
   },
+
   teamId: {
     color: "#94a3b8",
     fontWeight: 700
   },
+
   teamName: {
     fontSize: "26px",
     margin: "0 0 10px"
   },
+
   teamDescription: {
     color: "#cbd5e1",
     minHeight: "44px",
     lineHeight: 1.5
   },
+
   teamFooter: {
     display: "flex",
     justifyContent: "space-between",
     color: "#94a3b8",
     fontSize: "13px",
-    marginTop: "22px",
-    gap: "12px"
+    marginTop: "22px"
   },
+
   openButton: {
     width: "100%",
     marginTop: "18px",
@@ -392,9 +395,9 @@ const styles = {
     background: "linear-gradient(135deg, #22d3ee, #6366f1)",
     color: "white",
     fontWeight: 900,
-    cursor: "pointer",
-    boxShadow: "0 12px 30px rgba(34,211,238,0.25)"
+    cursor: "pointer"
   },
+
   emptyState: {
     padding: "34px",
     borderRadius: "28px",
@@ -403,10 +406,12 @@ const styles = {
     color: "#cbd5e1",
     textAlign: "center" as const
   },
+
   emptyTitle: {
     color: "#f8fafc",
     marginBottom: "8px"
   },
+
   emptyText: {
     margin: 0
   }
