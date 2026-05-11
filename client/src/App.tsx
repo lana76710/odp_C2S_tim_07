@@ -9,6 +9,14 @@ import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 
+import TeamsPage from "./pages/TeamsPage";
+import TeamDetailsPage from "./pages/TeamDetailsPage";
+import GamesPage from "./pages/GamesPage";
+
+import AdminGamesPage from "./pages/admin/AdminGamesPage";
+import AdminHealthPage from "./pages/admin/AdminHealthPage";
+import AdminAuditPage from "./pages/admin/AdminAuditPage";
+
 import MatchDetailsPage from "./pages/matches/MatchDetailsPage";
 import TournamentBracketPage from "./pages/tournaments/TournamentBracketPage";
 import ProfilePage from "./pages/profile/ProfilePage";
@@ -19,11 +27,58 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
+      <Route path="/games" element={<GamesPage />} />
+
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute requiredRole="user">
+          <ProtectedRoute requiredRole="player">
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/teams"
+        element={
+          <ProtectedRoute requiredRole="player">
+            <TeamsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/teams/:id"
+        element={
+          <ProtectedRoute requiredRole="player">
+            <TeamDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/matches/:id"
+        element={
+          <ProtectedRoute requiredRole="player">
+            <MatchDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tournaments/:id"
+        element={
+          <ProtectedRoute requiredRole="player">
+            <TournamentBracketPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute requiredRole="player">
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
@@ -36,6 +91,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/users"
         element={
@@ -46,26 +102,28 @@ export default function App() {
       />
 
       <Route
-        path="/matches/:id"
+        path="/admin/games"
         element={
-          <ProtectedRoute requiredRole="user">
-            <MatchDetailsPage />
+          <ProtectedRoute requiredRole="admin">
+            <AdminGamesPage />
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/tournaments/:id"
+        path="/admin/health"
         element={
-          <ProtectedRoute requiredRole="user">
-            <TournamentBracketPage />
+          <ProtectedRoute requiredRole="admin">
+            <AdminHealthPage />
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/profile"
+        path="/admin/audit"
         element={
-          <ProtectedRoute requiredRole="user">
-            <ProfilePage />
+          <ProtectedRoute requiredRole="admin">
+            <AdminAuditPage />
           </ProtectedRoute>
         }
       />
