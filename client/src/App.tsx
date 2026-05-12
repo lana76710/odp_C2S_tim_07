@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 import LoginPage    from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -18,6 +19,7 @@ import AdminAuditPage  from "./pages/admin/AdminAuditPage";
 import GamesPage       from "./pages/GamesPage";
 import TournamentsPage from "./pages/TournamentsPage";
 import AdminTournamentCreatePage from "./pages/admin/AdminTournamentCreatePage";
+import WatchlistPage from "./pages/WatchlistPage";
 
 export default function App() {
   return (
@@ -40,8 +42,19 @@ export default function App() {
   </ProtectedRoute>
 } />
 
+<Route path="/watchlist" element={
+  <ProtectedRoute>
+    <WatchlistPage />
+  </ProtectedRoute>
+} />
+
       {/* User routes */}
       <Route path="/dashboard" element={<ProtectedRoute requiredRole="player"><UserDashboard /></ProtectedRoute>} />
+      <Route path="/users/:id" element={
+  <ProtectedRoute>
+    <UserProfilePage />
+  </ProtectedRoute>
+} />
 
       {/* Admin routes */}
       <Route path="/admin"                 element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />

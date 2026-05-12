@@ -7,6 +7,7 @@ const userNav = [
   { to: "/games",     label: "Games",     icon: "◈" },
   { to: "/teams",     label: "Teams",     icon: "◎" },
   { to: "/tournaments", label: "Tournaments", icon: "♦" },
+  { to: "/watchlist", label: "Watchlist", icon: "★" },
 ];
 
 const adminNav = [
@@ -16,6 +17,7 @@ const adminNav = [
   { to: "/tournaments",    label: "Tournaments", icon: "♦" },
   { to: "/admin/health",   label: "Health",    icon: "♡" },
   { to: "/admin/audit",    label: "Audit Log", icon: "≡" },
+  { to: "/watchlist", label: "Watchlist", icon: "★" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -54,14 +56,17 @@ export function Layout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="border-t border-white/5 px-4 py-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-7 h-7 rounded-full bg-white/6 border border-white/10 flex items-center justify-center">
-              <span className="text-xs text-white/40 font-medium">{user?.gamer_tag?.[0]?.toUpperCase()}</span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-white/70 truncate">{user?.gamer_tag}</p>
-            </div>
-          </div>
+         <NavLink
+  to={`/users/${user?.id}`}
+  className="flex items-center gap-3 mb-3 hover:bg-white/4 rounded-lg p-1 -m-1 transition"
+>
+  <div className="w-7 h-7 rounded-full bg-white/6 border border-white/10 flex items-center justify-center">
+    <span className="text-xs text-white/40 font-medium">{user?.gamer_tag?.[0]?.toUpperCase()}</span>
+  </div>
+  <div className="min-w-0">
+    <p className="text-xs font-medium text-white/70 truncate">{user?.gamer_tag}</p>
+  </div>
+</NavLink>
           <button onClick={() => { logout(); navigate("/login"); }}
             className="text-xs text-white/20 hover:text-white/50 transition-colors w-full text-left">
             Sign out →
