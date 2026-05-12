@@ -6,12 +6,14 @@ const userNav = [
   { to: "/dashboard", label: "Dashboard", icon: "⬡" },
   { to: "/games",     label: "Games",     icon: "◈" },
   { to: "/teams",     label: "Teams",     icon: "◎" },
+  { to: "/tournaments", label: "Tournaments", icon: "♦" },
 ];
 
 const adminNav = [
   { to: "/admin",          label: "Dashboard", icon: "⬡" },
   { to: "/admin/users",    label: "Users",     icon: "◎" },
   { to: "/admin/games",    label: "Games",     icon: "◈" },
+  { to: "/tournaments",    label: "Tournaments", icon: "♦" },
   { to: "/admin/health",   label: "Health",    icon: "♡" },
   { to: "/admin/audit",    label: "Audit Log", icon: "≡" },
 ];
