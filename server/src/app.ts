@@ -74,6 +74,7 @@ app.post("/api/v1/teams", authenticate, (req, res) => teamController.createTeam(
 app.get("/api/v1/teams/:id/members", authenticate, (req, res) => teamController.getTeamMembers(req, res));
 
 app.get("/api/v1/teams", authenticate, (req, res) => teamController.getMyTeams(req, res));
+app.get("/api/v1/teams/invitations/my", authenticate, (req, res) => teamController.getMyInvitations(req, res));
 app.get("/api/v1/teams/:id", authenticate, (req, res) => teamController.getTeam(req, res));
 app.delete("/api/v1/teams/:id", authenticate, (req, res) => teamController.deleteTeam(req, res));
 
