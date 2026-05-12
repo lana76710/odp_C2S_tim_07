@@ -18,7 +18,7 @@ export function RegisterForm({ authApi }: { authApi: IAuthAPIService }) {
     setForm(f => ({ ...f, [k]: e.target.value }));
 
   const validate = (): string | null => {
-    if (!/^[a-zA-Z0-9\-\.]{3,30}$/.test(form.gamer_tag))
+    if (!/^[a-zA-Z0-9\-.]{3,30}$/.test(form.gamer_tag))
       return "Gamer tag: 3-30 chars, letters/numbers/hyphen/dot";
     if (form.full_name.trim().length < 2)
       return "Full name must be at least 2 characters";
