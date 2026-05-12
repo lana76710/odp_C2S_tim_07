@@ -8,7 +8,6 @@ const userNav = [
   { to: "/teams",     label: "Teams",     icon: "◎" },
   { to: "/tournaments", label: "Tournaments", icon: "♦" },
   { to: "/watchlist", label: "Watchlist", icon: "★" },
-  { to: "/profile",   label: "Profile",   icon: "◇" },
 ];
 
 const adminNav = [
