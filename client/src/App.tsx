@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 
-import LoginPage    from "./pages/auth/LoginPage";
+import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import NotFoundPage from "./pages/not_found/NotFoundPage";
 import UserProfilePage from "./pages/UserProfilePage";
@@ -9,52 +9,72 @@ import UserProfilePage from "./pages/UserProfilePage";
 import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
+
 import TeamsPage from "./pages/TeamsPage";
 import TeamDetailsPage from "./pages/TeamDetailsPage";
 import TournamentDetailsPage from "./pages/TournamentDetailsPage";
 
-import AdminGamesPage  from "./pages/admin/AdminGamesPage";
+import AdminGamesPage from "./pages/admin/AdminGamesPage";
 import AdminHealthPage from "./pages/admin/AdminHealthPage";
-import AdminAuditPage  from "./pages/admin/AdminAuditPage";
-import GamesPage       from "./pages/GamesPage";
+import AdminAuditPage from "./pages/admin/AdminAuditPage";
+import GamesPage from "./pages/GamesPage";
 import TournamentsPage from "./pages/TournamentsPage";
 import AdminTournamentCreatePage from "./pages/admin/AdminTournamentCreatePage";
 import WatchlistPage from "./pages/WatchlistPage";
 
+import MatchDetailsPage from "./pages/matches/MatchDetailsPage";
+import TournamentBracketPage from "./pages/tournaments/TournamentBracketPage";
+import ProfilePage from "./pages/profile/ProfilePage";
+
 export default function App() {
   return (
     <Routes>
-      <Route path="/login"    element={<LoginPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Public routes */}
       <Route path="/games" element={<GamesPage />} />
 
       {/* Tournaments */}
-     <Route path="/tournaments" element={
-  <ProtectedRoute>
-    <TournamentsPage />
-  </ProtectedRoute>
-} />
-<Route path="/tournaments/:id" element={
-  <ProtectedRoute>
-    <TournamentDetailsPage />
-  </ProtectedRoute>
-} />
+      <Route path="/tournaments" element={
+        <ProtectedRoute>
+          <TournamentsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/tournaments/:id" element={
+        <ProtectedRoute>
+          <TournamentDetailsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/tournaments/:id/bracket" element={
+        <ProtectedRoute requiredRole="player">
+          <TournamentBracketPage />
+        </ProtectedRoute>
+      } />
 
-<Route path="/watchlist" element={
-  <ProtectedRoute>
-    <WatchlistPage />
-  </ProtectedRoute>
-} />
+      <Route path="/matches/:id" element={
+        <ProtectedRoute requiredRole="player">
+          <MatchDetailsPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/watchlist" element={
+        <ProtectedRoute>
+          <WatchlistPage />
+        </ProtectedRoute>
+      } />
 
       {/* User routes */}
       <Route path="/dashboard" element={<ProtectedRoute requiredRole="player"><UserDashboard /></ProtectedRoute>} />
       <Route path="/users/:id" element={
-  <ProtectedRoute>
-    <UserProfilePage />
-  </ProtectedRoute>
-} />
+        <ProtectedRoute>
+          <UserProfilePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute requiredRole="player">
+          <ProfilePage />
+        </ProtectedRoute>
+      } />
 
       {/* Admin routes */}
       <Route path="/admin"                 element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
@@ -78,7 +98,7 @@ export default function App() {
 
       <Route path="/"    element={<Navigate to="/login" replace />} />
       <Route path="/404" element={<NotFoundPage />} />
-      <Route path="*"    element={<Navigate to="/404" replace />} />
+      <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   );
 }
