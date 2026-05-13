@@ -108,9 +108,7 @@ export class DbManager {
   }
 
   /** All reads (SELECT) → Round-Robin slaves, fallback to Master */
- public async getReadConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
-    return this.getWriteConnection();
-
+  public async getReadConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
     const n = this.slaves.length;
     for (let i = 0; i < n; i++) {
       const idx = (this.slaveRrIndex + i) % n;

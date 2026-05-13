@@ -3,22 +3,24 @@ import { ITournamentService } from "../../Domain/services/tournaments/ITournamen
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { validateTournament } from "../validators/tournaments/validateTournament";
 
 export class TournamentController {
   private readonly router = Router();
 
   public constructor(private readonly tournamentService: ITournamentService) {
+    this.router.get("/tournaments/watchlist/me", authenticate, this.getMyWatchlist.bind(this));
     this.router.get("/tournaments",     this.getAll.bind(this));
     this.router.get("/tournaments/:id", this.getById.bind(this));
     this.router.post("/tournaments",    authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
     this.router.put("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.update.bind(this));
     this.router.delete("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
-    this.router.post("/tournaments/:id/watch",    authenticate, this.watch.bind(this));
+    this.router.post("/tournaments/:id/watch",   authenticate, this.watch.bind(this));
+    this.router.delete("/tournaments/:id/watch", authenticate, this.unwatch.bind(this));
     this.router.post("/tournaments/:id/register",  authenticate, this.register.bind(this));
     this.router.delete("/tournaments/:id/register/:teamId", authenticate, this.unregister.bind(this));
     this.router.get("/tournaments/:id/registrations", this.getRegistrations.bind(this));
     this.router.patch("/tournaments/:id/registrations/:teamId",  authenticate, authorize(UserRole.ADMIN), this.updateStatus.bind(this));
-    this.router.get("/tournaments/watchlist/me", authenticate, this.getMyWatchlist.bind(this));
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -40,8 +42,10 @@ export class TournamentController {
   }
 
   private async create(req: Request, res: Response): Promise<void> {
-    const dto = req.body;
-    const data = await this.tournamentService.create(dto);
+    const { name, format, max_teams, registration_deadline, start_date } = req.body;
+    const v = validateTournament(name, format, Number(max_teams), registration_deadline, start_date);
+    if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
+    const data = await this.tournamentService.create(req.body);
     if (!data) { res.status(500).json({ success: false, message: "Failed to create tournament" }); return; }
     res.status(201).json({ success: true, data });
   }
@@ -49,6 +53,19 @@ export class TournamentController {
   private async update(req: Request, res: Response): Promise<void> {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
+    const { name, format, max_teams } = req.body;
+    if (name !== undefined && (String(name).trim().length < 3 || String(name).trim().length > 120)) {
+      res.status(400).json({ success: false, message: "Tournament name must be 3–120 characters" }); return;
+    }
+    if (format !== undefined && !["single_elimination", "double_elimination", "round_robin"].includes(format)) {
+      res.status(400).json({ success: false, message: "Invalid format" }); return;
+    }
+    if (max_teams !== undefined) {
+      const mt = Number(max_teams);
+      if (!Number.isInteger(mt) || mt < 4 || mt > 256) {
+        res.status(400).json({ success: false, message: "max_teams must be an integer between 4 and 256" }); return;
+      }
+    }
     const data = await this.tournamentService.update(id, req.body);
     if (!data) { res.status(404).json({ success: false, message: "Tournament not found" }); return; }
     res.status(200).json({ success: true, data });
@@ -82,8 +99,8 @@ private async register(req: Request, res: Response): Promise<void> {
   const tournamentId = parseInt(req.params.id as string, 10);
   const teamId = parseInt(req.body.team_id as string, 10);
   if (isNaN(tournamentId) || isNaN(teamId)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
-  const ok = await this.tournamentService.register(tournamentId, teamId);
-  res.status(ok ? 200 : 500).json({ success: ok });
+  const result = await this.tournamentService.register(tournamentId, teamId);
+  res.status(result.ok ? 200 : result.statusCode).json({ success: result.ok, message: result.message });
 }
 
 private async unregister(req: Request, res: Response): Promise<void> {

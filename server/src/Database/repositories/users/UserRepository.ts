@@ -136,6 +136,41 @@ export class UserRepository implements IUserRepository {
   } finally { res.conn.release(); }
 }
 
+async searchByGamerTag(query: string): Promise<User[]> {
+  const res = await this.db.getReadConnection();
+  if (!res) return [];
+  try {
+    const [rows] = await res.conn.execute<RowDataPacket[]>(
+      `SELECT * FROM users WHERE gamer_tag LIKE ? ORDER BY gamer_tag ASC LIMIT 20`,
+      [`%${query}%`]
+    );
+    return rows.map((r) => this.map(r));
+  } catch (err) {
+    this.logger.error("UserRepository", "searchByGamerTag failed", err);
+    return [];
+  } finally { res.conn.release(); }
+}
+
+async updateProfile(id: number, data: { full_name?: string; profile_image?: string | null }): Promise<boolean> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return false;
+  try {
+    const fields: string[] = [];
+    const params: (string | null | number)[] = [];
+    if (data.full_name !== undefined) { fields.push("full_name = ?"); params.push(data.full_name); }
+    if (data.profile_image !== undefined) { fields.push("profile_image = ?"); params.push(data.profile_image); }
+    if (fields.length === 0) return true;
+    params.push(id);
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `UPDATE users SET ${fields.join(", ")} WHERE id = ?`, params
+    );
+    return result.affectedRows > 0;
+  } catch (err) {
+    this.logger.error("UserRepository", "updateProfile failed", err);
+    return false;
+  } finally { res.conn.release(); }
+}
+
 async changeRole(id: number, role: UserRole): Promise<boolean> {
   const res = await this.db.getWriteConnection();
   if (!res) return false;

@@ -67,8 +67,20 @@ async getWatchlist(userId: number): Promise<TournamentDto[]> {
     .map((t) => this.toDto(t));
 }
 
-async register(tournamentId: number, teamId: number): Promise<boolean> {
-  return this.registrationRepo.register(tournamentId, teamId);
+async register(tournamentId: number, teamId: number): Promise<{ ok: boolean; statusCode: number; message: string }> {
+  const tournament = await this.tournamentRepo.findById(tournamentId);
+  if (!tournament) return { ok: false, statusCode: 404, message: "Tournament not found" };
+
+  if (new Date(tournament.registration_deadline) < new Date())
+    return { ok: false, statusCode: 400, message: "Registration deadline has passed" };
+
+  const alreadyRegistered = await this.registrationRepo.exists(tournamentId, teamId);
+  if (alreadyRegistered) return { ok: false, statusCode: 409, message: "Team is already registered for this tournament" };
+
+  const ok = await this.registrationRepo.register(tournamentId, teamId);
+  return ok
+    ? { ok: true, statusCode: 200, message: "Registration successful" }
+    : { ok: false, statusCode: 500, message: "Registration failed" };
 }
 
 async unregister(tournamentId: number, teamId: number): Promise<boolean> {

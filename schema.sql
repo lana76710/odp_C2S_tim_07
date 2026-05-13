@@ -103,6 +103,7 @@ CREATE TABLE tournament_registrations (
   team_id INT UNSIGNED NOT NULL,
   status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
   registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  seed INT UNSIGNED NULL,
   PRIMARY KEY (tournament_id, team_id),
   CONSTRAINT fk_tournament_registrations_tournament FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
   CONSTRAINT fk_tournament_registrations_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
@@ -114,7 +115,7 @@ CREATE INDEX idx_tournament_registrations_status ON tournament_registrations(sta
 CREATE TABLE user_watchlist (
   user_id INT UNSIGNED NOT NULL,
   tournament_id INT UNSIGNED NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, tournament_id),
   CONSTRAINT fk_user_watchlist_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_user_watchlist_tournament FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
@@ -151,6 +152,7 @@ CREATE TABLE match_players (
   match_id INT UNSIGNED NOT NULL,
   team_id INT UNSIGNED NOT NULL,
   user_id INT UNSIGNED NOT NULL,
+  performance_notes TEXT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (match_id, team_id, user_id),
   CONSTRAINT fk_match_players_match FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,

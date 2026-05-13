@@ -9,8 +9,10 @@ export class UserController {
 
   public constructor(private readonly userService: IUserService) {
     this.router.get("/users/all",       authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
+    this.router.get("/users/search",    authenticate, this.search.bind(this));
     this.router.get("/users/:id",       authenticate, this.getById.bind(this));
     this.router.put("/users/:id/role",  authenticate, authorize(UserRole.ADMIN), this.changeRole.bind(this));
+    this.router.put("/users/:id",       authenticate, this.updateProfile.bind(this));
   }
 
   private async getAll(_req: Request, res: Response): Promise<void> {
@@ -29,6 +31,33 @@ export class UserController {
       const user = await this.userService.getById(id);
       if (!user) { res.status(404).json({ success: false, message: "User not found" }); return; }
       res.status(200).json({ success: true, data: user });
+    } catch (err) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  }
+
+  private async search(req: Request, res: Response): Promise<void> {
+    try {
+      const q = String(req.query.q ?? "").trim();
+      if (!q || q.length < 2) { res.status(400).json({ success: false, message: "Query must be at least 2 characters" }); return; }
+      const users = await this.userService.searchByGamerTag(q);
+      res.status(200).json({ success: true, data: users });
+    } catch (err) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  }
+
+  private async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
+      if (req.user!.id !== id) { res.status(403).json({ success: false, message: "You can only update your own profile" }); return; }
+      const { full_name, profile_image } = req.body as { full_name?: string; profile_image?: string | null };
+      if (full_name !== undefined && (full_name.trim().length < 2 || full_name.trim().length > 100)) {
+        res.status(400).json({ success: false, message: "Full name must be 2–100 characters" }); return;
+      }
+      const ok = await this.userService.updateProfile(id, { full_name, profile_image });
+      res.status(ok ? 200 : 404).json({ success: ok, message: ok ? "Profile updated" : "User not found" });
     } catch (err) {
       res.status(500).json({ success: false, message: "Internal server error" });
     }
