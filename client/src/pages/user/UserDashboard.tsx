@@ -9,35 +9,41 @@ export default function UserDashboard() {
     <div>
       <PageHeader eyebrow="Overview" title={`Welcome, ${user?.gamer_tag}`} />
 
-      <p className="text-white/70 text-sm mb-4">
-        Latest matches from your watchlist.
+      <p className="text-white/70 text-sm mb-6">
+        Jump into a tournament or check the teams you manage.
       </p>
 
-      <ul className="text-sm space-y-2">
-        <li>
-          <Link
-            to="/matches/1"
-            className="text-white/80 hover:text-white underline decoration-white/30 hover:decoration-white/70 transition-colors"
-          >
-            Match #1
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/matches/2"
-            className="text-white/80 hover:text-white underline decoration-white/30 hover:decoration-white/70 transition-colors"
-          >
-            Match #2
-          </Link>
-        </li>
-      </ul>
+      <div className="grid sm:grid-cols-2 gap-3 max-w-xl">
+        <Link
+          to="/tournaments"
+          className="rounded-lg border border-white/10 p-4 bg-white/5 hover:bg-white/10 transition"
+        >
+          <p className="text-white font-medium">Tournaments</p>
+          <p className="text-xs text-white/50 mt-1">Browse and register your team.</p>
+        </Link>
 
-      <div className="mt-4">
+        <Link
+          to="/teams"
+          className="rounded-lg border border-white/10 p-4 bg-white/5 hover:bg-white/10 transition"
+        >
+          <p className="text-white font-medium">My teams</p>
+          <p className="text-xs text-white/50 mt-1">Manage your rosters and invites.</p>
+        </Link>
+
+        <Link
+          to="/watchlist"
+          className="rounded-lg border border-white/10 p-4 bg-white/5 hover:bg-white/10 transition"
+        >
+          <p className="text-white font-medium">Watchlist</p>
+          <p className="text-xs text-white/50 mt-1">Tournaments you are following.</p>
+        </Link>
+
         <Link
           to={`/users/${user?.id}`}
-          className="text-white/80 hover:text-white underline decoration-white/30 hover:decoration-white/70 transition-colors text-sm"
+          className="rounded-lg border border-white/10 p-4 bg-white/5 hover:bg-white/10 transition"
         >
-          Go to profile
+          <p className="text-white font-medium">My profile</p>
+          <p className="text-xs text-white/50 mt-1">View and edit your profile.</p>
         </Link>
       </div>
     </div>
