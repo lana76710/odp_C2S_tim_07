@@ -5,7 +5,8 @@ export interface IUserRepository {
   findByGamerTag(tag: string):    Promise<User>;
   findByEmail(email: string):     Promise<User>;
   findAll():                      Promise<User[]>;
+  searchByGamerTag(query: string): Promise<User[]>;
   create(user: User):             Promise<User>;
-  update(user: User):             Promise<boolean>;
+  updateProfile(id: number, data: { full_name?: string; profile_image?: string | null }): Promise<boolean>;
   changeRole(id: number, role: string): Promise<boolean>;
 }

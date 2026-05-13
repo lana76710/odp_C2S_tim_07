@@ -16,6 +16,15 @@ export class UserService implements IUserService {
     return new UserDto(u.id, u.gamer_tag, u.full_name, u.email, u.role, u.profile_image);
   }
 
+  async searchByGamerTag(query: string): Promise<UserDto[]> {
+    const users = await this.userRepo.searchByGamerTag(query);
+    return users.map((u) => new UserDto(u.id, u.gamer_tag, u.full_name, u.email, u.role, u.profile_image));
+  }
+
+  updateProfile(id: number, data: { full_name?: string; profile_image?: string | null }): Promise<boolean> {
+    return this.userRepo.updateProfile(id, data);
+  }
+
   changeRole(id: number, role: string): Promise<boolean> {
     return this.userRepo.changeRole(id, role);
   }
