@@ -118,14 +118,22 @@ export default function TournamentDetailsPage() {
       </Link>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-4 gap-3 flex-wrap">
           <h1 className="text-3xl font-bold">{tournament.name}</h1>
-          <button
-            onClick={handleWatch}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
-          >
-            {watching ? "Unwatch" : "Watch"}
-          </button>
+          <div className="flex gap-2">
+            <Link
+              to={`/tournaments/${tournament.id}/bracket`}
+              className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded transition"
+            >
+              View bracket
+            </Link>
+            <button
+              onClick={handleWatch}
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
+            >
+              {watching ? "Unwatch" : "Watch"}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -185,27 +193,27 @@ export default function TournamentDetailsPage() {
                   <td className="py-2">{r.team_id}</td>
                   <td className="py-2">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      r.status === "confirmed" ? "bg-green-700" :
-                      r.status === "disqualified" ? "bg-red-700" : "bg-yellow-700"
+                      r.status === "approved" ? "bg-green-700" :
+                      r.status === "rejected" ? "bg-red-700" : "bg-yellow-700"
                     }`}>{r.status}</span>
                   </td>
                   <td className="py-2">{new Date(r.registered_at).toLocaleString()}</td>
                   {user?.role === "admin" && (
                     <td className="py-2 flex gap-2">
-                      {r.status !== "confirmed" && (
+                      {r.status !== "approved" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "confirmed")}
+                          onClick={() => handleUpdateStatus(r.team_id, "approved")}
                           className="bg-green-700 hover:bg-green-600 px-2 py-1 rounded text-xs"
                         >
-                          Confirm
+                          Approve
                         </button>
                       )}
-                      {r.status !== "disqualified" && (
+                      {r.status !== "rejected" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "disqualified")}
+                          onClick={() => handleUpdateStatus(r.team_id, "rejected")}
                           className="bg-red-700 hover:bg-red-600 px-2 py-1 rounded text-xs"
                         >
-                          Disqualify
+                          Reject
                         </button>
                       )}
                     </td>

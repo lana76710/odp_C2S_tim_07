@@ -46,13 +46,13 @@ export default function App() {
         </ProtectedRoute>
       } />
       <Route path="/tournaments/:id/bracket" element={
-        <ProtectedRoute requiredRole="player">
+        <ProtectedRoute>
           <TournamentBracketPage />
         </ProtectedRoute>
       } />
 
       <Route path="/matches/:id" element={
-        <ProtectedRoute requiredRole="player">
+        <ProtectedRoute>
           <MatchDetailsPage />
         </ProtectedRoute>
       } />
@@ -86,12 +86,12 @@ export default function App() {
 
       {/* Teams */}
       <Route path="/teams" element={
-        <ProtectedRoute requiredRole="player">
+        <ProtectedRoute>
           <TeamsPage />
         </ProtectedRoute>
       } />
       <Route path="/teams/:id" element={
-        <ProtectedRoute requiredRole="player">
+        <ProtectedRoute>
           <TeamDetailsPage />
         </ProtectedRoute>
       } />
