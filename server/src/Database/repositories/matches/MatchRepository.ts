@@ -128,10 +128,13 @@ export class MatchRepository implements IMatchRepository {
         ],
       );
 
-      const created = await this.findById(result.insertId);
-      if (!created) throw new Error("Failed to fetch created match");
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM matches WHERE id = ?`,
+        [result.insertId],
+      );
+      if (rows.length === 0) throw new Error("Failed to fetch created match");
 
-      return created;
+      return this.mapMatch(rows[0]);
     } catch (err) {
       this.logger.error("MatchRepository", "create failed", err);
       throw err;

@@ -82,7 +82,7 @@ export default function App() {
       <Route path="/admin/games"           element={<ProtectedRoute requiredRole="admin"><AdminGamesPage /></ProtectedRoute>} />
       <Route path="/admin/health"          element={<ProtectedRoute requiredRole="admin"><AdminHealthPage /></ProtectedRoute>} />
       <Route path="/admin/audit"           element={<ProtectedRoute requiredRole="admin"><AdminAuditPage /></ProtectedRoute>} />
-      <Route path="/admin/tournaments/new" element={<ProtectedRoute requiredRole="admin"><AdminTournamentCreatePage /></ProtectedRoute>} />
+      <Route path="/admin/tournaments/create" element={<ProtectedRoute requiredRole="admin"><AdminTournamentCreatePage /></ProtectedRoute>} />
 
       {/* Teams */}
       <Route path="/teams" element={
