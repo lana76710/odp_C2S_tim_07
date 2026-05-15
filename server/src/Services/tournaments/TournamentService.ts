@@ -70,6 +70,17 @@ async register(tournamentId: number, teamId: number): Promise<{ ok: boolean; sta
   if (tournament.status !== "upcoming")
     return { ok: false, statusCode: 400, message: "Registration is only available for upcoming tournaments" };
 
+  const teamSize = await this.registrationRepo.getTeamMemberRequirement(tournamentId, teamId);
+  if (!teamSize) return { ok: false, statusCode: 404, message: "Tournament or team not found" };
+
+  if (teamSize.memberCount < teamSize.requiredMembers) {
+    return {
+      ok: false,
+      statusCode: 400,
+      message: `Team must have at least ${teamSize.requiredMembers} members to register for this tournament`,
+    };
+  }
+
   const alreadyRegistered = await this.registrationRepo.exists(tournamentId, teamId);
   if (alreadyRegistered) return { ok: false, statusCode: 409, message: "Team is already registered for this tournament" };
 

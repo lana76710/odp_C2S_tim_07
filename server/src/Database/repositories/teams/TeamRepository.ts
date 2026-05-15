@@ -79,7 +79,10 @@ export class TeamRepository {
 
   async getUserTeams(userId: number): Promise<RowDataPacket[]> {
     return this.selectRows(
-      `SELECT t.*
+      `SELECT t.*,
+              (SELECT COUNT(*)
+               FROM team_members tm_all
+               WHERE tm_all.team_id = t.id) AS members_count
        FROM teams t
        JOIN team_members tm ON t.id = tm.team_id
        WHERE tm.user_id = ?`,
