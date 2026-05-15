@@ -18,9 +18,9 @@ export class TournamentController {
     this.router.get("/tournaments/:id", this.getById.bind(this));
     this.router.post("/tournaments",    authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
     this.router.put("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.update.bind(this));
-    this.router.delete("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
     this.router.post("/tournaments/:id/watch",   authenticate, this.watch.bind(this));
     this.router.delete("/tournaments/:id/watch", authenticate, this.unwatch.bind(this));
+    this.router.delete("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
     this.router.get("/watchlist", authenticate, this.getMyWatchlist.bind(this));
     this.router.post("/watchlist/:id", authenticate, this.watch.bind(this));
     this.router.delete("/watchlist/:id", authenticate, this.unwatch.bind(this));
