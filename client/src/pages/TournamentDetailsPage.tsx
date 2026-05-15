@@ -84,25 +84,34 @@ export default function TournamentDetailsPage() {
     } finally {
       setRegistering(false);
     }
-
-    
   };
 
   const handleUpdateStatus = async (teamId: number, status: string) => {
-  if (!tournament) return;
-  try {
-    const token = localStorage.getItem("authToken");
-    await axios.patch(
-      `/api/v1/tournaments/${tournament.id}/registrations/${teamId}`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const regs = await TournamentsAPIService.getRegistrations(tournament.id);
-    setRegistrations(regs);
-  } catch {
-    alert("Update failed");
-  }
-};
+    if (!tournament) return;
+    try {
+      const token = localStorage.getItem("authToken");
+      await axios.patch(
+        `/api/v1/tournaments/${tournament.id}/registrations/${teamId}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const regs = await TournamentsAPIService.getRegistrations(tournament.id);
+      setRegistrations(regs);
+    } catch {
+      alert("Update failed");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!tournament) return;
+    if (!confirm(`Are you sure you want to delete "${tournament.name}"? This cannot be undone.`)) return;
+    try {
+      await TournamentsAPIService.delete(tournament.id);
+      window.location.href = "/tournaments";
+    } catch {
+      alert("Failed to delete tournament");
+    }
+  };
 
   if (loading) return <div className="p-8 text-white">Loading...</div>;
   if (error || !tournament) return <div className="p-8 text-white">{error}</div>;
@@ -120,19 +129,53 @@ export default function TournamentDetailsPage() {
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
         <div className="flex justify-between items-start mb-4 gap-3 flex-wrap">
           <h1 className="text-3xl font-bold">{tournament.name}</h1>
-          <div className="flex gap-2">
-            <Link
-              to={`/tournaments/${tournament.id}/bracket`}
-              className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded transition"
-            >
-              View bracket
-            </Link>
-            <button
-              onClick={handleWatch}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
-            >
-              {watching ? "Unwatch" : "Watch"}
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
+            <div className="flex gap-2">
+              <Link
+                to={`/tournaments/${tournament.id}/bracket`}
+                className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded transition"
+              >
+                View bracket
+              </Link>
+              <button
+                onClick={handleWatch}
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
+              >
+                {watching ? "Unwatch" : "Watch"}
+              </button>
+            </div>
+            {user?.role === "admin" && (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Link
+                  to={`/admin/tournaments/${tournament.id}/edit`}
+                  style={{
+                    padding: "8px 16px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "11px",
+                    letterSpacing: "0.18em",
+                    textDecoration: "none",
+                  }}
+                >
+                  EDIT
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  style={{
+                    padding: "8px 16px",
+                    background: "rgba(255,80,80,0.08)",
+                    border: "1px solid rgba(255,80,80,0.4)",
+                    color: "rgba(255,130,130,0.9)",
+                    fontSize: "11px",
+                    letterSpacing: "0.18em",
+                    cursor: "pointer",
+                  }}
+                >
+                  DELETE
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -178,7 +221,7 @@ export default function TournamentDetailsPage() {
         {registrations.length === 0 ? (
           <p className="text-zinc-400">No teams registered yet.</p>
         ) : (
-                   <table className="w-full text-sm">
+          <table className="w-full text-sm">
             <thead className="text-zinc-400 text-left">
               <tr>
                 <th className="py-2">Team ID</th>
