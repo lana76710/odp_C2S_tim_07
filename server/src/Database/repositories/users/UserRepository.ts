@@ -11,25 +11,25 @@ export class UserRepository implements IUserRepository {
     private readonly logger: ILoggerService,
   ) {}
 
-  private map(r: RowDataPacket): User {
-   return new User(r.id, r.gamer_tag, r.full_name, r.email, r.role as UserRole, r.password_hash);
-  }
+private map(r: RowDataPacket): User {
+  return new User(r.id, r.gamer_tag, r.full_name, r.email, r.role as UserRole, r.password_hash, r.profile_image ?? null);
+}
 
-  async create(user: User): Promise<User> {
-    const res = await this.db.getWriteConnection();
-    if (!res) return new User();
-    try {
-      const [result] = await res.conn.execute<ResultSetHeader>(
-       `INSERT INTO users (gamer_tag, full_name, email, role, password_hash) VALUES (?, ?, ?, ?, ?)`,
-      [user.gamer_tag, user.full_name, user.email, user.role, user.password_hash]
-      );
-      if (result.insertId === 0) return new User();
-      return new User(result.insertId, user.gamer_tag, user.full_name, user.email, user.role, user.password_hash);
-    } catch (err) {
-      this.logger.error("UserRepository", "create failed", err);
-      return new User();
-    } finally { res.conn.release(); }
-  }
+async create(user: User): Promise<User> {
+  const res = await this.db.getWriteConnection();
+  if (!res) return new User();
+  try {
+    const [result] = await res.conn.execute<ResultSetHeader>(
+      `INSERT INTO users (gamer_tag, full_name, email, role, password_hash, profile_image) VALUES (?, ?, ?, ?, ?, ?)`,
+      [user.gamer_tag, user.full_name, user.email, user.role, user.password_hash, user.profile_image ?? null]
+    );
+    if (result.insertId === 0) return new User();
+    return new User(result.insertId, user.gamer_tag, user.full_name, user.email, user.role, user.password_hash, user.profile_image ?? null);
+  } catch (err) {
+    this.logger.error("UserRepository", "create failed", err);
+    return new User();
+  } finally { res.conn.release(); }
+}
 
   async findById(id: number): Promise<User> {
     const res = await this.db.getMasterConnection();
@@ -151,14 +151,16 @@ async searchByGamerTag(query: string): Promise<User[]> {
   } finally { res.conn.release(); }
 }
 
-async updateProfile(id: number, data: { full_name?: string; profile_image?: string | null }): Promise<boolean> {
+async updateProfile(id: number, data: { full_name?: string; profile_image?: string | null; gamer_tag?: string; email?: string }): Promise<boolean> {
   const res = await this.db.getWriteConnection();
   if (!res) return false;
   try {
     const fields: string[] = [];
     const params: (string | null | number)[] = [];
-    if (data.full_name !== undefined) { fields.push("full_name = ?"); params.push(data.full_name); }
+    if (data.full_name !== undefined)     { fields.push("full_name = ?");     params.push(data.full_name); }
     if (data.profile_image !== undefined) { fields.push("profile_image = ?"); params.push(data.profile_image); }
+    if (data.gamer_tag !== undefined)     { fields.push("gamer_tag = ?");     params.push(data.gamer_tag); }
+    if (data.email !== undefined)         { fields.push("email = ?");         params.push(data.email); }
     if (fields.length === 0) return true;
     params.push(id);
     const [result] = await res.conn.execute<ResultSetHeader>(

@@ -21,7 +21,19 @@ export class UserService implements IUserService {
     return users.map((u) => new UserDto(u.id, u.gamer_tag, u.full_name, u.email, u.role, u.profile_image));
   }
 
-  updateProfile(id: number, data: { full_name?: string; profile_image?: string | null }): Promise<boolean> {
+  async findByGamerTag(gamer_tag: string): Promise<UserDto | null> {
+    const u = await this.userRepo.findByGamerTag(gamer_tag);
+    if (u.id === 0) return null;
+    return new UserDto(u.id, u.gamer_tag, u.full_name, u.email, u.role, u.profile_image);
+  }
+
+  async findByEmail(email: string): Promise<UserDto | null> {
+    const u = await this.userRepo.findByEmail(email);
+    if (u.id === 0) return null;
+    return new UserDto(u.id, u.gamer_tag, u.full_name, u.email, u.role, u.profile_image);
+  }
+
+  updateProfile(id: number, data: { full_name?: string; profile_image?: string | null; gamer_tag?: string; email?: string }): Promise<boolean> {
     return this.userRepo.updateProfile(id, data);
   }
 
