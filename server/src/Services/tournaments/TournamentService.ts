@@ -32,12 +32,8 @@ export class TournamentService implements ITournamentService {
   }
 
   async create(dto: CreateTournamentDto): Promise<TournamentDto | null> {
-    try {
-      const t = await this.tournamentRepo.create(dto);
-      return this.toDto(t);
-    } catch {
-      return null;
-    }
+    const t = await this.tournamentRepo.create(dto);
+    return this.toDto(t);
   }
 
   async update(id: number, dto: Partial<CreateTournamentDto>): Promise<TournamentDto | null> {
