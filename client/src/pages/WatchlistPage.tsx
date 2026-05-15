@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { TournamentsAPIService, type Tournament } from "../api_services/tournaments/TournamentsAPIService";
+import { MatchesAPIService, type Match } from "../api_services/matches/MatchesAPIService";
 import { StatusBadge } from "../components/ui/UI";
 
 export default function WatchlistPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [resultsByTournament, setResultsByTournament] = useState<Record<number, Match[]>>({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [removingId, setRemovingId] = useState<number | null>(null);
@@ -17,9 +19,31 @@ export default function WatchlistPage() {
         const res = await axios.get("/api/v1/tournaments/watchlist/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setTournaments(res.data.data);
+        const watched = res.data.data ?? [];
+        setTournaments(watched);
+
+        const resultEntries = await Promise.all(
+          watched.map(async (tournament: Tournament) => {
+            try {
+              const matches = await MatchesAPIService.getByTournament(tournament.id);
+              const latestResults = matches
+                .filter((match) => match.status === "completed")
+                .sort((a, b) => {
+                  const aTime = new Date(a.updated_at ?? a.created_at).getTime();
+                  const bTime = new Date(b.updated_at ?? b.created_at).getTime();
+                  return bTime - aTime;
+                })
+                .slice(0, 3);
+              return [tournament.id, latestResults] as const;
+            } catch {
+              return [tournament.id, []] as const;
+            }
+          }),
+        );
+        setResultsByTournament(Object.fromEntries(resultEntries));
       } catch {
         setTournaments([]);
+        setResultsByTournament({});
       } finally {
         setLoading(false);
       }
@@ -33,6 +57,11 @@ export default function WatchlistPage() {
     try {
       await TournamentsAPIService.unwatch(tournamentId);
       setTournaments((current) => current.filter((tournament) => tournament.id !== tournamentId));
+      setResultsByTournament((current) => {
+        const next = { ...current };
+        delete next[tournamentId];
+        return next;
+      });
       setMessage("Successfully removed from watchlist");
     } catch {
       setMessage("Failed to remove from watchlist");
@@ -101,6 +130,30 @@ export default function WatchlistPage() {
               </Link>
               <div style={{ marginTop: "12px" }}>
                 <StatusBadge status={t.status} />
+              </div>
+
+              <div style={{ marginTop: "18px", paddingTop: "14px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ fontSize: "10px", letterSpacing: "0.16em", color: "rgba(255,255,255,0.3)", marginBottom: "10px" }}>
+                  LATEST RESULTS
+                </div>
+                {(resultsByTournament[t.id] ?? []).length === 0 ? (
+                  <div style={{ color: "rgba(255,255,255,0.28)", fontSize: "12px" }}>No completed results yet.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {resultsByTournament[t.id].map((match) => (
+                      <Link
+                        key={match.id}
+                        to={`/matches/${match.id}`}
+                        style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "center", color: "#fff", textDecoration: "none", fontSize: "12px" }}
+                      >
+                        <span style={{ color: "rgba(255,255,255,0.72)" }}>Match #{match.match_number}</span>
+                        <span style={{ color: "rgba(255,40,120,0.9)", fontWeight: 700 }}>
+                          {match.team1_score ?? "-"} : {match.team2_score ?? "-"}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 type="button"

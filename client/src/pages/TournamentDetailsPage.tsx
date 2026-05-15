@@ -187,6 +187,18 @@ export default function TournamentDetailsPage() {
     }
   };
 
+  const handleLockRegistrations = async () => {
+    if (!tournament) return;
+    if (!confirm("Lock registrations for this tournament?")) return;
+    try {
+      const updated = await TournamentsAPIService.update(tournament.id, { status: "ongoing" });
+      setTournament(updated);
+      alert("Registrations locked");
+    } catch {
+      alert("Failed to lock registrations");
+    }
+  };
+
   if (loading) return <div style={{ padding: "32px", color: "#fff" }}>Loading...</div>;
   if (error || !tournament) return <div style={{ padding: "32px", color: "#fff" }}>{error}</div>;
 
@@ -240,6 +252,11 @@ export default function TournamentDetailsPage() {
 
               {user?.role === "admin" && (
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {tournament.status === "upcoming" && (
+                    <button onClick={handleLockRegistrations} style={{ ...actionButton, padding: "10px 16px", background: "rgba(255,40,120,0.1)", border: "1px solid rgba(255,40,120,0.45)", color: ACCENT }}>
+                      Lock registrations
+                    </button>
+                  )}
                   <Link to={`/admin/tournaments/${tournament.id}/edit`} style={{ ...actionButton, padding: "10px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
                     Edit
                   </Link>

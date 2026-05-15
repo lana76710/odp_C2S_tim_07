@@ -9,8 +9,42 @@ import { TeamsAPIService } from "../../api_services/teams/TeamsAPIService";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import { StatusBadge } from "../../components/ui/UI";
 
-type TeamInfo = { id: number; name: string; tag: string };
+const ACCENT = "#ff2878";
+const GRID_LINES = [1, 2, 3, 4, 5, 6, 7];
 
+const panelStyle: React.CSSProperties = {
+  position: "relative",
+  background: "rgba(255,255,255,0.02)",
+  border: "1px solid rgba(255,255,255,0.06)",
+  padding: "24px 28px",
+};
+
+const actionStyle: React.CSSProperties = {
+  padding: "12px 18px",
+  background: "rgba(255,40,120,0.1)",
+  border: "1px solid rgba(255,40,120,0.45)",
+  color: ACCENT,
+  fontSize: "11px",
+  fontWeight: 700,
+  letterSpacing: "0.18em",
+  textDecoration: "none",
+  textTransform: "uppercase",
+  cursor: "pointer",
+  fontFamily: "inherit",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "76px",
+  background: "#07050f",
+  border: "1px solid rgba(255,255,255,0.12)",
+  padding: "10px 12px",
+  color: "#fff",
+  fontSize: "15px",
+  outline: "none",
+  fontFamily: "inherit",
+};
+
+type TeamInfo = { id: number; name: string; tag: string };
 type MemberOption = { user_id: number; gamer_tag: string; team_id: number };
 
 export default function MatchDetailsPage() {
@@ -107,11 +141,11 @@ export default function MatchDetailsPage() {
     const s1 = parseInt(team1Score, 10);
     const s2 = parseInt(team2Score, 10);
     if (isNaN(s1) || isNaN(s2) || s1 < 0 || s2 < 0) {
-      alert("Enter valid non-negative integers (format X:Y).");
+      alert("Enter valid non-negative integers.");
       return;
     }
     if (s1 === s2) {
-      alert("Result must have a clear winner — scores cannot be equal.");
+      alert("Result must have a clear winner. Scores cannot be equal.");
       return;
     }
     const winner_team_id = s1 > s2 ? match.team1_id : match.team2_id;
@@ -150,19 +184,6 @@ export default function MatchDetailsPage() {
     }
   };
 
-  if (loading) return <p className="text-sm text-white/70">Loading match details...</p>;
-  if (error || !match) {
-    return (
-      <div className="space-y-3 text-white">
-        <h1 className="text-2xl font-semibold">Match not found</h1>
-        <p className="text-sm text-white/70">No data for match #{matchId}.</p>
-        <Link className="underline text-sm text-blue-400" to="/dashboard">
-          Back to dashboard
-        </Link>
-      </div>
-    );
-  }
-
   const teamLabel = (info: TeamInfo | null, fallbackId: number | null) =>
     info ? `${info.name} (${info.tag})` : fallbackId == null ? "TBD" : `Team #${fallbackId}`;
 
@@ -176,28 +197,26 @@ export default function MatchDetailsPage() {
     const benched = members.filter((m) => !activeIds.has(m.user_id));
 
     return (
-      <article className="rounded-lg border border-white/10 p-4 bg-white/5 space-y-3">
-        <h2 className="font-semibold">{teamLabel(teamInfo, teamId)}</h2>
+      <article style={panelStyle}>
+        <div style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,40,120,0.7)", marginBottom: "12px" }}>TEAM</div>
+        <h2 style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 20px" }}>{teamLabel(teamInfo, teamId)}<span style={{ color: ACCENT }}>.</span></h2>
 
         <div>
-          <p className="text-xs uppercase tracking-wider text-white/40 mb-2">
-            Active in match
+          <p style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", margin: "0 0 10px" }}>
+            ACTIVE IN MATCH
           </p>
           {active.length === 0 ? (
-            <p className="text-sm text-white/50">No players assigned yet.</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>No players assigned yet.</p>
           ) : (
-            <ul className="text-sm space-y-1">
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
               {active.map((p) => {
                 const member = members.find((m) => m.user_id === p.user_id);
                 return (
-                  <li key={p.user_id} className="flex justify-between items-center">
+                  <li key={p.user_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
                     <span>{member?.gamer_tag ?? `User #${p.user_id}`}</span>
                     {user && (
-                      <button
-                        onClick={() => handleRemovePlayer(p.user_id)}
-                        className="text-xs text-red-300 hover:text-red-200"
-                      >
-                        Remove
+                      <button onClick={() => handleRemovePlayer(p.user_id)} style={{ background: "transparent", border: "none", color: "rgba(255,130,130,0.9)", cursor: "pointer", fontSize: "11px", letterSpacing: "0.08em" }}>
+                        REMOVE
                       </button>
                     )}
                   </li>
@@ -208,19 +227,16 @@ export default function MatchDetailsPage() {
         </div>
 
         {user && teamId != null && benched.length > 0 && (
-          <div>
-            <p className="text-xs uppercase tracking-wider text-white/40 mb-2">
-              Add player (captain only)
+          <div style={{ marginTop: "22px" }}>
+            <p style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", margin: "0 0 10px" }}>
+              ADD PLAYER
             </p>
-            <ul className="text-sm space-y-1">
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
               {benched.map((m) => (
-                <li key={m.user_id} className="flex justify-between items-center">
+                <li key={m.user_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
                   <span>{m.gamer_tag}</span>
-                  <button
-                    onClick={() => handleAddPlayer(m.user_id, teamId)}
-                    className="text-xs text-blue-300 hover:text-blue-200"
-                  >
-                    Add
+                  <button onClick={() => handleAddPlayer(m.user_id, teamId)} style={{ background: "transparent", border: "none", color: ACCENT, cursor: "pointer", fontSize: "11px", letterSpacing: "0.08em" }}>
+                    ADD
                   </button>
                 </li>
               ))}
@@ -231,77 +247,75 @@ export default function MatchDetailsPage() {
     );
   };
 
-  return (
-    <div className="space-y-6 text-white">
-      <div className="flex justify-between items-start gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {teamLabel(team1, match.team1_id)} vs {teamLabel(team2, match.team2_id)}
-          </h1>
-          <p className="text-sm text-white/70 flex items-center gap-2 flex-wrap">
-            <span>Match #{match.id} • Round {match.round_number} • Match {match.match_number}</span>
-            <StatusBadge status={match.status} />
-          </p>
-        </div>
-        <Link
-          to={`/tournaments/${match.tournament_id}/bracket`}
-          className="px-3 py-2 rounded border border-white/15 text-sm hover:bg-white/5"
-        >
-          ← Bracket
-        </Link>
+  if (loading) return <div style={{ padding: "32px", color: "#fff" }}>Loading match details...</div>;
+  if (error || !match) {
+    return (
+      <div style={{ padding: "32px", color: "#fff" }}>
+        <h1>Match not found</h1>
+        <p>No data for match #{matchId}.</p>
+        <Link style={{ color: ACCENT }} to="/dashboard">Back to dashboard</Link>
       </div>
+    );
+  }
 
-      <section className="rounded-lg border border-white/10 p-4 bg-white/5">
-        <h2 className="font-semibold mb-2">Score</h2>
-        <p className="text-lg">
-          {teamLabel(team1, match.team1_id)}{" "}
-          <span className="text-emerald-400">{match.team1_score ?? "-"}</span> :{" "}
-          <span className="text-emerald-400">{match.team2_score ?? "-"}</span>{" "}
-          {teamLabel(team2, match.team2_id)}
-        </p>
-        {match.winner_team_id && (
-          <p className="text-sm text-white/70 mt-1">
-            Winner:{" "}
-            {match.winner_team_id === match.team1_id
-              ? teamLabel(team1, match.team1_id)
-              : teamLabel(team2, match.team2_id)}
-          </p>
-        )}
+  return (
+    <div style={{ minHeight: "100vh", background: "#06040f", fontFamily: "Inter,Arial,sans-serif", color: "#fff", position: "relative", overflow: "hidden" }}>
+      {GRID_LINES.map(i => <div key={`h${i}`} style={{ position: "fixed", left: 0, right: 0, top: `${i * 100 / 8}%`, height: "1px", background: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />)}
+      {GRID_LINES.map(i => <div key={`v${i}`} style={{ position: "fixed", top: 0, bottom: 0, left: `${i * 100 / 8}%`, width: "1px", background: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />)}
 
-        {user?.role === "admin" && match.team1_id != null && match.team2_id != null && (
-          <div className="mt-4 flex gap-2 items-center">
-            <input
-              type="number"
-              min={0}
-              value={team1Score}
-              onChange={(e) => setTeam1Score(e.target.value)}
-              className="w-20 bg-zinc-800 border border-zinc-700 rounded px-2 py-1"
-              placeholder="0"
-            />
-            <span>:</span>
-            <input
-              type="number"
-              min={0}
-              value={team2Score}
-              onChange={(e) => setTeam2Score(e.target.value)}
-              className="w-20 bg-zinc-800 border border-zinc-700 rounded px-2 py-1"
-              placeholder="0"
-            />
-            <button
-              onClick={handleSubmitResult}
-              disabled={submitting}
-              className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-sm"
-            >
-              {submitting ? "Saving..." : "Save result"}
-            </button>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: "1180px", margin: "0 auto", padding: "56px 32px 60px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", flexWrap: "wrap", marginBottom: "32px" }}>
+          <div>
+            <div style={{ fontSize: "10px", letterSpacing: "0.28em", color: "rgba(255,40,120,0.7)", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ display: "inline-block", width: "20px", height: "1px", background: "rgba(255,40,120,0.6)" }} />
+              ARENA / MATCH
+            </div>
+            <h1 style={{ fontSize: "32px", fontWeight: 800, letterSpacing: "-0.5px", margin: "0 0 10px" }}>
+              {teamLabel(team1, match.team1_id)} vs {teamLabel(team2, match.team2_id)}<span style={{ color: ACCENT }}>.</span>
+            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>
+              <span>Match #{match.id} / Round {match.round_number} / Match {match.match_number}</span>
+              <StatusBadge status={match.status} />
+            </div>
           </div>
-        )}
-      </section>
+          <Link to={`/tournaments/${match.tournament_id}/bracket`} style={{ ...actionStyle, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff" }}>
+            Bracket
+          </Link>
+        </div>
 
-      <section className="grid md:grid-cols-2 gap-4">
-        {renderRoster(team1, match.team1_id, team1Members)}
-        {renderRoster(team2, match.team2_id, team2Members)}
-      </section>
+        <section style={{ ...panelStyle, marginBottom: "30px" }}>
+          <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", borderTop: "1px solid rgba(255,40,120,0.55)", borderRight: "1px solid rgba(255,40,120,0.55)" }} />
+          <div style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,40,120,0.7)", marginBottom: "12px" }}>SCORE</div>
+          <div style={{ fontSize: "24px", fontWeight: 800, marginBottom: "16px" }}>
+            {teamLabel(team1, match.team1_id)} <span style={{ color: ACCENT }}>{match.team1_score ?? "-"}</span>
+            <span style={{ color: "rgba(255,255,255,0.35)" }}> : </span>
+            <span style={{ color: ACCENT }}>{match.team2_score ?? "-"}</span> {teamLabel(team2, match.team2_id)}
+          </div>
+          {match.winner_team_id && (
+            <p style={{ color: "rgba(255,255,255,0.45)", margin: "0 0 18px", fontSize: "13px" }}>
+              Winner: {match.winner_team_id === match.team1_id
+                ? teamLabel(team1, match.team1_id)
+                : teamLabel(team2, match.team2_id)}
+            </p>
+          )}
+
+          {user?.role === "admin" && match.team1_id != null && match.team2_id != null && (
+            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+              <input type="number" min={0} value={team1Score} onChange={(e) => setTeam1Score(e.target.value)} style={inputStyle} placeholder="0" />
+              <span style={{ color: "rgba(255,255,255,0.45)", fontWeight: 800 }}>:</span>
+              <input type="number" min={0} value={team2Score} onChange={(e) => setTeam2Score(e.target.value)} style={inputStyle} placeholder="0" />
+              <button onClick={handleSubmitResult} disabled={submitting} style={{ ...actionStyle, opacity: submitting ? 0.45 : 1, cursor: submitting ? "not-allowed" : "pointer" }}>
+                {submitting ? "Saving..." : "Save result"}
+              </button>
+            </div>
+          )}
+        </section>
+
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "18px" }}>
+          {renderRoster(team1, match.team1_id, team1Members)}
+          {renderRoster(team2, match.team2_id, team2Members)}
+        </section>
+      </div>
     </div>
   );
 }
