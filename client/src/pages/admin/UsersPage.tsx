@@ -45,7 +45,7 @@ export default function UsersPage() {
 
   const filtered = users.filter(u =>
     !search.trim() ||
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
+    u.gamer_tag.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase()) ||
     u.role.toLowerCase().includes(search.toLowerCase())
   );
@@ -101,10 +101,10 @@ export default function UsersPage() {
                   onMouseEnter={e => { e.currentTarget.style.background="rgba(255,40,120,0.035)"; e.currentTarget.style.borderLeftColor="rgba(255,40,120,0.4)"; }}
                   onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.015)"; e.currentTarget.style.borderLeftColor="transparent"; }}>
                   <span style={{ fontFamily:"monospace", fontSize:"11px", color:"rgba(255,255,255,0.2)" }}>{u.id}</span>
-                  <span style={{ fontSize:"13px", color:"#fff", fontWeight:500 }}>{u.username}</span>
+                  <span style={{ fontSize:"13px", color:"#fff", fontWeight:500 }}>{u.gamer_tag}</span>
                   <span style={{ fontSize:"12px", color:"rgba(255,255,255,0.35)" }}>{u.email}</span>
                   <RoleBadge role={u.role} />
-                  <StatusDot active={u.isActive} />
+                  <StatusDot active={u.isActive ?? 1} />
                 </div>
               ))}
             </div>
