@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TeamsAPIService } from "../api_services/teams/TeamsAPIService";
 import type { TeamDto } from "../models/team/TeamTypes";
+import { StatusBadge } from "../components/ui/UI";
 
 type Invitation = {
   id: number;
@@ -103,7 +104,7 @@ export default function TeamsPage() {
                     <span style={{ ...styles.badge, background: "linear-gradient(135deg, rgba(255,40,120,0.4), rgba(255,40,120,0.2))", color: "#ffb3cc" }}>
                       {inv.team_tag}
                     </span>
-                    <span style={styles.teamId}>#{inv.team_id}</span>
+                    <StatusBadge status="pending" />
                   </div>
                   <h3 style={styles.teamName}>{inv.team_name}</h3>
                   <p style={styles.teamDescription}>

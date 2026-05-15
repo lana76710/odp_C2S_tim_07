@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TournamentsAPIService, type Tournament } from "../api_services/tournaments/TournamentsAPIService";
 import { useAuth } from "../hooks/auth/useAuthHook";
+import { StatusBadge } from "../components/ui/UI";
 
 export default function TournamentsPage() {
   const { user } = useAuth();
@@ -83,7 +84,6 @@ export default function TournamentsPage() {
         >
           <option value="">ALL STATUSES</option>
           <option value="upcoming">UPCOMING</option>
-          <option value="registration_open">REGISTRATION OPEN</option>
           <option value="ongoing">ONGOING</option>
           <option value="completed">COMPLETED</option>
           <option value="cancelled">CANCELLED</option>
@@ -146,9 +146,8 @@ export default function TournamentsPage() {
                 <span style={{ color: "#ff2878" }}>${t.prize_pool ?? 0}</span>
               </div>
 
-              <div style={{ marginTop: "12px", fontSize: "10px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
-                <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: "#ff2878", marginRight: "8px", verticalAlign: "2px" }} />
-                {t.status.toUpperCase().replace(/_/g, " ")}
+              <div style={{ marginTop: "12px" }}>
+                <StatusBadge status={t.status} />
               </div>
             </Link>
           ))}

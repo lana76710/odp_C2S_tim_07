@@ -101,7 +101,7 @@ CREATE INDEX idx_tournaments_status ON tournaments(status);
 CREATE TABLE tournament_registrations (
   tournament_id INT UNSIGNED NOT NULL,
   team_id INT UNSIGNED NOT NULL,
-  status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+  status ENUM('pending', 'confirmed', 'disqualified') NOT NULL DEFAULT 'pending',
   registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   seed INT UNSIGNED NULL,
   PRIMARY KEY (tournament_id, team_id),

@@ -67,8 +67,8 @@ async register(tournamentId: number, teamId: number): Promise<{ ok: boolean; sta
   const tournament = await this.tournamentRepo.findById(tournamentId);
   if (!tournament) return { ok: false, statusCode: 404, message: "Tournament not found" };
 
-  if (new Date(tournament.registration_deadline) < new Date())
-    return { ok: false, statusCode: 400, message: "Registration deadline has passed" };
+  if (tournament.status !== "upcoming")
+    return { ok: false, statusCode: 400, message: "Registration is only available for upcoming tournaments" };
 
   const alreadyRegistered = await this.registrationRepo.exists(tournamentId, teamId);
   if (alreadyRegistered) return { ok: false, statusCode: 409, message: "Team is already registered for this tournament" };

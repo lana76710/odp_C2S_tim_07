@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MatchesAPIService, type Match } from "../../api_services/matches/MatchesAPIService";
 import { TeamsAPIService } from "../../api_services/teams/TeamsAPIService";
 import { useAuth } from "../../hooks/auth/useAuthHook";
+import { StatusBadge } from "../../components/ui/UI";
 
 export default function TournamentBracketPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,13 +54,13 @@ export default function TournamentBracketPage() {
   }, [tournamentId]);
 
   const handleGenerate = async () => {
-    if (!confirm("Generate bracket? This will create all matches from approved teams.")) return;
+    if (!confirm("Generate bracket? This will create all matches from confirmed teams.")) return;
     setGenerating(true);
     try {
       await MatchesAPIService.generateBracket(tournamentId);
       await load();
     } catch {
-      alert("Bracket generation failed. Make sure there are at least 2 approved teams.");
+      alert("Bracket generation failed. Make sure there are at least 2 confirmed teams.");
     } finally {
       setGenerating(false);
     }
@@ -129,6 +130,7 @@ export default function TournamentBracketPage() {
           <option value="scheduled">Scheduled</option>
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <select
           value={roundFilter}
@@ -169,7 +171,7 @@ export default function TournamentBracketPage() {
         <div className="rounded-lg border border-white/10 p-6 bg-white/5">
           <p className="text-white/70 text-sm">
             No matches yet. {user?.role === "admin"
-              ? "Generate the bracket once approved teams are ready."
+              ? "Generate the bracket once confirmed teams are ready."
               : "Bracket has not been generated yet."}
           </p>
         </div>
@@ -182,8 +184,9 @@ export default function TournamentBracketPage() {
                 {list.map((m) => (
                   <li key={m.id} className="rounded border border-white/10 p-3">
                     <Link to={`/matches/${m.id}`} className="block hover:bg-white/5 -m-3 p-3 rounded">
-                      <div className="text-xs text-white/50 mb-1">
-                        Match #{m.match_number} • {m.status}
+                      <div className="text-xs text-white/50 mb-2 flex items-center gap-2">
+                        <span>Match #{m.match_number}</span>
+                        <StatusBadge status={m.status} />
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className={m.winner_team_id === m.team1_id ? "font-semibold text-emerald-400" : ""}>

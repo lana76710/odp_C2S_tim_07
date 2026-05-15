@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { TournamentsAPIService, type Tournament } from "../api_services/tournaments/TournamentsAPIService";
 import { useAuth } from "../hooks/auth/useAuthHook";
+import { StatusBadge } from "../components/ui/UI";
 
 interface MyTeam {
   id: number;
@@ -43,6 +44,15 @@ export default function TournamentDetailsPage() {
             const teams = Array.isArray(res.data) ? res.data : res.data.data ?? [];
             setMyTeams(teams);
           } catch { /* ignore */ }
+
+          try {
+            const watchlist = await TournamentsAPIService.getMyWatchlist();
+            setWatching(watchlist.some((watchedTournament) => watchedTournament.id === tournamentId));
+          } catch {
+            setWatching(false);
+          }
+        } else {
+          setWatching(false);
         }
       } catch {
         setError("Tournament not found");
@@ -59,9 +69,11 @@ export default function TournamentDetailsPage() {
       if (watching) {
         await TournamentsAPIService.unwatch(tournament.id);
         setWatching(false);
+        alert("Successfully removed from watchlist");
       } else {
         await TournamentsAPIService.watch(tournament.id);
         setWatching(true);
+        alert("Successfully added to watchlist");
       }
     } catch {
       alert("Action failed");
@@ -79,8 +91,8 @@ export default function TournamentDetailsPage() {
       const regs = await TournamentsAPIService.getRegistrations(tournament.id);
       setRegistrations(regs);
       alert("Team registered!");
-    } catch {
-      alert("Registration failed");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setRegistering(false);
     }
@@ -119,6 +131,11 @@ export default function TournamentDetailsPage() {
   const availableTeams = myTeams.filter(
     (t) => !registrations.some((r) => r.team_id === t.id)
   );
+  const registrationOpen = tournament.status === "upcoming";
+  const registrationClosedReason =
+    tournament.status !== "upcoming"
+      ? "Registration is only available for upcoming tournaments."
+      : "";
 
   return (
     <div className="p-8 text-white max-w-4xl mx-auto">
@@ -181,7 +198,7 @@ export default function TournamentDetailsPage() {
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div><span className="text-zinc-400">Format:</span> {tournament.format}</div>
-          <div><span className="text-zinc-400">Status:</span> <span className="text-blue-400">{tournament.status}</span></div>
+          <div><span className="text-zinc-400">Status:</span> <StatusBadge status={tournament.status} /></div>
           <div><span className="text-zinc-400">Max teams:</span> {tournament.max_teams}</div>
           <div><span className="text-zinc-400">Prize pool:</span> ${tournament.prize_pool ?? 0}</div>
           <div><span className="text-zinc-400">Registration deadline:</span> {new Date(tournament.registration_deadline).toLocaleString()}</div>
@@ -189,7 +206,7 @@ export default function TournamentDetailsPage() {
         </div>
       </div>
 
-      {availableTeams.length > 0 && (
+      {registrationOpen && availableTeams.length > 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Register a Team</h2>
           <div className="flex gap-3">
@@ -216,6 +233,13 @@ export default function TournamentDetailsPage() {
         </div>
       )}
 
+      {!registrationOpen && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-2">Registration closed</h2>
+          <p className="text-zinc-400">{registrationClosedReason}</p>
+        </div>
+      )}
+
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Registered Teams ({registrations.length})</h2>
         {registrations.length === 0 ? (
@@ -235,25 +259,22 @@ export default function TournamentDetailsPage() {
                 <tr key={r.team_id} className="border-t border-zinc-800">
                   <td className="py-2">{r.team_id}</td>
                   <td className="py-2">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      r.status === "approved" ? "bg-green-700" :
-                      r.status === "rejected" ? "bg-red-700" : "bg-yellow-700"
-                    }`}>{r.status}</span>
+                    <StatusBadge status={r.status} />
                   </td>
                   <td className="py-2">{new Date(r.registered_at).toLocaleString()}</td>
                   {user?.role === "admin" && (
                     <td className="py-2 flex gap-2">
-                      {r.status !== "approved" && (
+                      {r.status !== "confirmed" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "approved")}
+                          onClick={() => handleUpdateStatus(r.team_id, "confirmed")}
                           className="bg-green-700 hover:bg-green-600 px-2 py-1 rounded text-xs"
                         >
-                          Approve
+                          Confirm
                         </button>
                       )}
-                      {r.status !== "rejected" && (
+                      {r.status !== "disqualified" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "rejected")}
+                          onClick={() => handleUpdateStatus(r.team_id, "disqualified")}
                           className="bg-red-700 hover:bg-red-600 px-2 py-1 rounded text-xs"
                         >
                           Disqualify

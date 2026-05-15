@@ -7,6 +7,7 @@ import {
 } from "../../api_services/matches/MatchesAPIService";
 import { TeamsAPIService } from "../../api_services/teams/TeamsAPIService";
 import { useAuth } from "../../hooks/auth/useAuthHook";
+import { StatusBadge } from "../../components/ui/UI";
 
 type TeamInfo = { id: number; name: string; tag: string };
 
@@ -237,9 +238,9 @@ export default function MatchDetailsPage() {
           <h1 className="text-2xl font-semibold">
             {teamLabel(team1, match.team1_id)} vs {teamLabel(team2, match.team2_id)}
           </h1>
-          <p className="text-sm text-white/70">
-            Match #{match.id} • Round {match.round_number} • Match {match.match_number} • Status:{" "}
-            {match.status}
+          <p className="text-sm text-white/70 flex items-center gap-2 flex-wrap">
+            <span>Match #{match.id} • Round {match.round_number} • Match {match.match_number}</span>
+            <StatusBadge status={match.status} />
           </p>
         </div>
         <Link

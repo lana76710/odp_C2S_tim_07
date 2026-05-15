@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { type Tournament } from "../api_services/tournaments/TournamentsAPIService";
+import { TournamentsAPIService, type Tournament } from "../api_services/tournaments/TournamentsAPIService";
+import { StatusBadge } from "../components/ui/UI";
 
 export default function WatchlistPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -24,6 +27,20 @@ export default function WatchlistPage() {
     load();
   }, []);
 
+  const handleUnwatch = async (tournamentId: number) => {
+    setRemovingId(tournamentId);
+    setMessage("");
+    try {
+      await TournamentsAPIService.unwatch(tournamentId);
+      setTournaments((current) => current.filter((tournament) => tournament.id !== tournamentId));
+      setMessage("Successfully removed from watchlist");
+    } catch {
+      setMessage("Failed to remove from watchlist");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   return (
     <div style={{ minHeight: "100%", padding: "32px", fontFamily: "Inter,Arial,sans-serif", color: "#fff" }}>
       <div style={{ fontSize: "10px", letterSpacing: "0.22em", color: "rgba(255,40,120,0.7)", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
@@ -38,6 +55,12 @@ export default function WatchlistPage() {
         Tournaments you're tracking.
       </p>
 
+      {message && (
+        <p style={{ color: message.includes("Successfully") ? "rgba(80,255,160,0.9)" : "rgba(255,100,100,0.9)", marginBottom: "18px" }}>
+          {message}
+        </p>
+      )}
+
       {loading ? (
         <p style={{ color: "rgba(255,255,255,0.4)" }}>Loading...</p>
       ) : tournaments.length === 0 ? (
@@ -45,9 +68,8 @@ export default function WatchlistPage() {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
           {tournaments.map((t) => (
-            <Link
+            <div
               key={t.id}
-              to={`/tournaments/${t.id}`}
               style={{
                 position: "relative",
                 padding: "20px",
@@ -74,12 +96,31 @@ export default function WatchlistPage() {
               <div style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,40,120,0.7)", marginBottom: "8px" }}>
                 {t.format.toUpperCase().replace(/_/g, " ")}
               </div>
-              <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "12px", letterSpacing: "-0.3px" }}>{t.name}</h2>
-              <div style={{ fontSize: "10px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
-                <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: "#ff2878", marginRight: "8px", verticalAlign: "2px" }} />
-                {t.status.toUpperCase().replace(/_/g, " ")}
+              <Link to={`/tournaments/${t.id}`} style={{ color: "#fff", textDecoration: "none" }}>
+                <h2 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "12px", letterSpacing: "-0.3px" }}>{t.name}</h2>
+              </Link>
+              <div style={{ marginTop: "12px" }}>
+                <StatusBadge status={t.status} />
               </div>
-            </Link>
+              <button
+                type="button"
+                onClick={() => handleUnwatch(t.id)}
+                disabled={removingId === t.id}
+                style={{
+                  marginTop: "18px",
+                  padding: "9px 14px",
+                  background: "rgba(255,40,120,0.12)",
+                  border: "1px solid rgba(255,40,120,0.45)",
+                  color: "#fff",
+                  cursor: removingId === t.id ? "not-allowed" : "pointer",
+                  opacity: removingId === t.id ? 0.6 : 1,
+                  fontSize: "12px",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {removingId === t.id ? "Removing..." : "Unwatch"}
+              </button>
+            </div>
           ))}
         </div>
       )}

@@ -8,7 +8,7 @@ export class TeamRepository {
   public constructor(private readonly db: DbManager) {}
 
   private async selectRows(sql: string, params: DbParam[]): Promise<RowDataPacket[]> {
-    const readConnection = await this.db.getReadConnection();
+    const readConnection = await this.db.getMasterConnection();
 
     if (!readConnection) {
       return [];
@@ -93,6 +93,17 @@ export class TeamRepository {
        FROM teams
        WHERE id = ?`,
       [teamId]
+    );
+
+    return rows.length > 0 ? rows[0] : null;
+  }
+
+  async getTeamByTag(tag: string): Promise<RowDataPacket | null> {
+    const rows = await this.selectRows(
+      `SELECT *
+       FROM teams
+       WHERE tag = ?`,
+      [tag]
     );
 
     return rows.length > 0 ? rows[0] : null;

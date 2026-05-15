@@ -105,7 +105,7 @@ export class MatchController {
     if (data.length === 0) {
       res.status(400).json({
         success: false,
-        message: "Not enough approved teams to generate bracket",
+        message: "Not enough confirmed teams to generate bracket",
       });
       return;
     }

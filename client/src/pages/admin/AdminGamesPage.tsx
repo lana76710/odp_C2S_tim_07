@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { gamesApi } from "../../api_services/games/GamesAPIService";
 import type { GameDto, CreateGameDto } from "../../models/game/GameTypes";
 
@@ -33,6 +34,7 @@ export default function AdminGamesPage() {
   const [editId, setEditId]     = useState<number | null>(null);
   const [form, setForm]         = useState<CreateGameDto>(emptyForm);
   const [error, setError]       = useState("");
+  const [expandedGameId, setExpandedGameId] = useState<number | null>(null);
 
   const load = () => {
     gamesApi.getAll().then((res) => {
@@ -139,8 +141,10 @@ export default function AdminGamesPage() {
 
         <div style={{ display:"flex", flexDirection:"column", gap:"2px" }}>
           {games.map((game, idx) => (
-            <div key={game.id}
-              style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", padding:"16px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", transition:"border-color 0.2s" }}
+            <div key={game.id}>
+            <div
+              onClick={() => setExpandedGameId((current) => current === game.id ? null : game.id)}
+              style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", padding:"16px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", transition:"border-color 0.2s", cursor:"pointer" }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(255,40,120,0.2)")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)")}>
               <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
@@ -155,11 +159,33 @@ export default function AdminGamesPage() {
                 </div>
               </div>
               <div style={{ display:"flex", gap:"16px" }}>
-                <button onClick={() => handleEdit(game)} style={{ fontSize:"11px", letterSpacing:"0.1em", color:"rgba(255,255,255,0.4)", background:"none", border:"none", cursor:"pointer", padding:0, fontFamily:"inherit" }}
+                <button onClick={(e) => { e.stopPropagation(); handleEdit(game); }} style={{ fontSize:"11px", letterSpacing:"0.1em", color:"rgba(255,255,255,0.4)", background:"none", border:"none", cursor:"pointer", padding:0, fontFamily:"inherit" }}
                   onMouseEnter={e => e.currentTarget.style.color="#fff"} onMouseLeave={e => e.currentTarget.style.color="rgba(255,255,255,0.4)"}>EDIT</button>
-                <button onClick={() => handleDelete(game.id)} style={{ fontSize:"11px", letterSpacing:"0.1em", color:"rgba(255,40,120,0.5)", background:"none", border:"none", cursor:"pointer", padding:0, fontFamily:"inherit" }}
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(game.id); }} style={{ fontSize:"11px", letterSpacing:"0.1em", color:"rgba(255,40,120,0.5)", background:"none", border:"none", cursor:"pointer", padding:0, fontFamily:"inherit" }}
                   onMouseEnter={e => e.currentTarget.style.color=ACCENT} onMouseLeave={e => e.currentTarget.style.color="rgba(255,40,120,0.5)"}>DELETE</button>
               </div>
+            </div>
+            {expandedGameId === game.id && (
+              <div style={{ background:"rgba(255,255,255,0.015)", border:"1px solid rgba(255,255,255,0.06)", borderTop:"none", padding:"14px 20px 16px 64px" }}>
+                <div style={{ fontSize:"10px", letterSpacing:"0.14em", color:"rgba(255,255,255,0.28)", marginBottom:"10px" }}>TOURNAMENTS</div>
+                {game.tournaments.length === 0 ? (
+                  <div style={{ color:"rgba(255,255,255,0.28)", fontSize:"12px" }}>No tournaments for this game.</div>
+                ) : (
+                  <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                    {game.tournaments.map((tournament) => (
+                      <Link
+                        key={tournament.id}
+                        to={`/tournaments/${tournament.id}`}
+                        style={{ color:"#fff", textDecoration:"none", fontSize:"12px", display:"flex", justifyContent:"space-between", gap:"12px" }}
+                      >
+                        <span>{tournament.name}</span>
+                        <span style={{ color:"rgba(255,255,255,0.35)", fontSize:"10px" }}>{tournament.status.replace(/_/g, " ")}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             </div>
           ))}
         </div>

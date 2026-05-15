@@ -21,6 +21,9 @@ export class TournamentController {
     this.router.delete("/tournaments/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
     this.router.post("/tournaments/:id/watch",   authenticate, this.watch.bind(this));
     this.router.delete("/tournaments/:id/watch", authenticate, this.unwatch.bind(this));
+    this.router.get("/watchlist", authenticate, this.getMyWatchlist.bind(this));
+    this.router.post("/watchlist/:id", authenticate, this.watch.bind(this));
+    this.router.delete("/watchlist/:id", authenticate, this.unwatch.bind(this));
     this.router.post("/tournaments/:id/register",  authenticate, this.register.bind(this));
     this.router.delete("/tournaments/:id/register/:teamId", authenticate, this.unregister.bind(this));
     this.router.get("/tournaments/:id/registrations", this.getRegistrations.bind(this));
@@ -64,12 +67,15 @@ export class TournamentController {
   private async update(req: Request, res: Response): Promise<void> {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
-    const { name, format, max_teams } = req.body;
+    const { name, format, max_teams, status } = req.body;
     if (name !== undefined && (String(name).trim().length < 3 || String(name).trim().length > 120)) {
       res.status(400).json({ success: false, message: "Tournament name must be 3–120 characters" }); return;
     }
     if (format !== undefined && !["single_elimination", "double_elimination", "round_robin"].includes(format)) {
       res.status(400).json({ success: false, message: "Invalid format" }); return;
+    }
+    if (status !== undefined && !["upcoming", "ongoing", "completed", "cancelled"].includes(status)) {
+      res.status(400).json({ success: false, message: "Invalid status" }); return;
     }
     if (max_teams !== undefined) {
       const mt = Number(max_teams);
@@ -137,6 +143,9 @@ export class TournamentController {
     const { status } = req.body;
     if (isNaN(tournamentId) || isNaN(teamId)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
     if (!status) { res.status(400).json({ success: false, message: "Status required" }); return; }
+    if (!["pending", "confirmed", "disqualified"].includes(String(status))) {
+      res.status(400).json({ success: false, message: "Invalid registration status" }); return;
+    }
     const ok = await this.tournamentService.updateRegistrationStatus(tournamentId, teamId, status);
     res.status(ok ? 200 : 404).json({ success: ok });
   }

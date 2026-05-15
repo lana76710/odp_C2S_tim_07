@@ -88,7 +88,7 @@ export class MatchRepository implements IMatchRepository {
   }
 
   async findApprovedTeamIdsByTournamentId(tournamentId: number): Promise<number[]> {
-    const res = await this.db.getReadConnection();
+    const res = await this.db.getMasterConnection();
     if (!res) return [];
 
     try {

@@ -10,6 +10,7 @@ export default function AdminTournamentEditPage() {
   const [name, setName] = useState("");
   const [gameId, setGameId] = useState<number>(1);
   const [format, setFormat] = useState("single_elimination");
+  const [status, setStatus] = useState("upcoming");
   const [maxTeams, setMaxTeams] = useState<number>(8);
   const [prizePool, setPrizePool] = useState<number>(0);
   const [registrationDeadline, setRegistrationDeadline] = useState("");
@@ -26,6 +27,7 @@ export default function AdminTournamentEditPage() {
         setName(t.name);
         setGameId(t.game_id);
         setFormat(t.format);
+        setStatus(t.status);
         setMaxTeams(t.max_teams);
         setPrizePool(t.prize_pool ?? 0);
         setRegistrationDeadline(t.registration_deadline.slice(0, 16));
@@ -42,6 +44,7 @@ export default function AdminTournamentEditPage() {
   const validate = (): string | null => {
     if (!name || name.length < 3 || name.length > 120) return "Name must be 3–120 characters";
     if (!["single_elimination", "double_elimination", "round_robin"].includes(format)) return "Invalid format";
+    if (!["upcoming", "ongoing", "completed", "cancelled"].includes(status)) return "Invalid status";
     if (maxTeams < 2 || maxTeams > 256) return "Max teams must be between 2 and 256";
     if (!POWERS_OF_TWO.includes(maxTeams)) return "Max teams must be a power of 2 (2, 4, 8, 16, 32...)";
     if (prizePool < 0) return "Prize pool cannot be negative";
@@ -59,6 +62,7 @@ export default function AdminTournamentEditPage() {
     try {
       await TournamentsAPIService.update(parseInt(id!, 10), {
         name, game_id: gameId, format, max_teams: maxTeams,
+        status,
         prize_pool: prizePool,
         registration_deadline: registrationDeadline,
         start_date: startDate,
@@ -117,6 +121,16 @@ export default function AdminTournamentEditPage() {
             <option value="single_elimination">Single elimination</option>
             <option value="double_elimination">Double elimination</option>
             <option value="round_robin">Round robin</option>
+          </select>
+        </div>
+
+        <div>
+          <div style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginBottom: "8px" }}>STATUS</div>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle}>
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
 

@@ -36,7 +36,7 @@ export class TournamentRepository implements ITournamentRepository {
   }
 
   async findAll(filters: { gameId?: number; status?: string; format?: string }): Promise<Tournament[]> {
-    const res = await this.db.getReadConnection();
+    const res = await this.db.getMasterConnection();
     if (!res) return [];
     try {
       let query = `SELECT * FROM tournaments WHERE 1=1`;
@@ -56,7 +56,7 @@ export class TournamentRepository implements ITournamentRepository {
   }
 
   async findById(id: number): Promise<Tournament | null> {
-    const res = await this.db.getReadConnection();
+    const res = await this.db.getMasterConnection();
     if (!res) return null;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
@@ -104,6 +104,7 @@ export class TournamentRepository implements ITournamentRepository {
 
       if (dto.name)                  { fields.push("name = ?");                  params.push(dto.name); }
       if (dto.format)                { fields.push("format = ?");                params.push(dto.format); }
+      if (dto.status)               { fields.push("status = ?");                params.push(dto.status); }
       if (dto.max_teams)             { fields.push("max_teams = ?");             params.push(dto.max_teams); }
       if (dto.prize_pool !== undefined) { fields.push("prize_pool = ?");         params.push(dto.prize_pool); }
       if (dto.registration_deadline) {

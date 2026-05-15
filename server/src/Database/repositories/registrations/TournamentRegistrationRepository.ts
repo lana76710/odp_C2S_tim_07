@@ -40,7 +40,7 @@ export class TournamentRegistrationRepository implements ITournamentRegistration
   }
 
   async findByTournamentId(tournamentId: number): Promise<{ team_id: number; status: string; registered_at: Date }[]> {
-    const res = await this.db.getReadConnection();
+    const res = await this.db.getMasterConnection();
     if (!res) return [];
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
@@ -55,7 +55,7 @@ export class TournamentRegistrationRepository implements ITournamentRegistration
   }
 
   async exists(tournamentId: number, teamId: number): Promise<boolean> {
-    const res = await this.db.getReadConnection();
+    const res = await this.db.getMasterConnection();
     if (!res) return false;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(

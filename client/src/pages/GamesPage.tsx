@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { gamesApi } from "../api_services/games/GamesAPIService";
 import type { GameDto } from "../models/game/GameTypes";
 
@@ -16,6 +17,7 @@ export default function GamesPage() {
   const [games, setGames]     = useState<GameDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
+  const [expandedGameId, setExpandedGameId] = useState<number | null>(null);
 
   useEffect(() => {
     gamesApi.getAll().then((res) => {
@@ -70,7 +72,8 @@ export default function GamesPage() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))", gap:"2px" }}>
           {filtered.map((game, idx) => (
             <div key={game.id}
-              style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", padding:"20px 22px", position:"relative", transition:"border-color 0.2s, background 0.2s" }}
+              onClick={() => setExpandedGameId((current) => current === game.id ? null : game.id)}
+              style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", padding:"20px 22px", position:"relative", transition:"border-color 0.2s, background 0.2s", cursor:"pointer" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(255,40,120,0.3)"; e.currentTarget.style.background="rgba(255,40,120,0.03)"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"; e.currentTarget.style.background="rgba(255,255,255,0.02)"; }}
             >
@@ -95,9 +98,39 @@ export default function GamesPage() {
                   {game.max_players_per_team}v{game.max_players_per_team}
                 </span>
                 <span style={{ fontSize:"11px", color: game.active_tournaments_count > 0 ? ACCENT : "rgba(255,255,255,0.2)" }}>
-                  {game.active_tournaments_count > 0 ? `● ${game.active_tournaments_count} active` : "no active tournaments"}
+                  {game.active_tournaments_count > 0
+                    ? `● ${game.active_tournaments_count} available tournaments`
+                    : "no available tournaments"}
                 </span>
               </div>
+
+              {expandedGameId === game.id && (
+                <div style={{ marginTop:"14px", paddingTop:"12px", borderTop:"1px solid rgba(255,255,255,0.05)" }}>
+                  <div style={{ fontSize:"10px", letterSpacing:"0.14em", color:"rgba(255,255,255,0.28)", marginBottom:"8px" }}>
+                    TOURNAMENTS
+                  </div>
+                  {game.tournaments.length === 0 ? (
+                    <div style={{ color:"rgba(255,255,255,0.28)", fontSize:"12px" }}>No tournaments for this game.</div>
+                  ) : (
+                    <div style={{ display:"flex", flexDirection:"column", gap:"7px" }}>
+                      {game.tournaments.map((tournament) => (
+                        <Link
+                          key={tournament.id}
+                          to={`/tournaments/${tournament.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ color:"#fff", textDecoration:"none", fontSize:"12px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:"8px" }}
+                        >
+                          <span style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                            <span style={{ width:"5px", height:"5px", borderRadius:"50%", background: tournament.status === "upcoming" ? ACCENT : "rgba(255,255,255,0.25)", flexShrink:0 }} />
+                            {tournament.name}
+                          </span>
+                          <span style={{ color:"rgba(255,255,255,0.35)", fontSize:"10px" }}>{tournament.status.replace(/_/g, " ")}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
