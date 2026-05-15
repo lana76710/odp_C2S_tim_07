@@ -26,7 +26,7 @@ const SECTIONS = [
         <path d="M6 15v1a6 6 0 0 0 6 6h0M6 9V8a6 6 0 0 1 6-6h6"/>
       </svg>
     ),
-    path: "/admin/tournaments/create",
+    path: "/admin/tournaments/new",
   },
   {
     key: "users",
