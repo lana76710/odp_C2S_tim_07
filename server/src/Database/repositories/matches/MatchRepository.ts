@@ -95,7 +95,7 @@ export class MatchRepository implements IMatchRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
         `SELECT team_id
          FROM tournament_registrations
-         WHERE tournament_id = ? AND status = 'approved'
+         WHERE tournament_id = ? AND status = 'confirmed'
          ORDER BY registered_at ASC`,
         [tournamentId],
       );

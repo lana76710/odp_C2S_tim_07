@@ -236,27 +236,27 @@ export default function TournamentDetailsPage() {
                   <td className="py-2">{r.team_id}</td>
                   <td className="py-2">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      r.status === "approved" ? "bg-green-700" :
-                      r.status === "rejected" ? "bg-red-700" : "bg-yellow-700"
+                      r.status === "confirmed" ? "bg-green-700" :
+                      r.status === "disqualified" ? "bg-red-700" : "bg-yellow-700"
                     }`}>{r.status}</span>
                   </td>
                   <td className="py-2">{new Date(r.registered_at).toLocaleString()}</td>
                   {user?.role === "admin" && (
                     <td className="py-2 flex gap-2">
-                      {r.status !== "approved" && (
+                      {r.status !== "confirmed" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "approved")}
+                          onClick={() => handleUpdateStatus(r.team_id, "confirmed")}
                           className="bg-green-700 hover:bg-green-600 px-2 py-1 rounded text-xs"
                         >
-                          Approve
+                          Confirm
                         </button>
                       )}
-                      {r.status !== "rejected" && (
+                      {r.status !== "disqualified" && (
                         <button
-                          onClick={() => handleUpdateStatus(r.team_id, "rejected")}
+                          onClick={() => handleUpdateStatus(r.team_id, "disqualified")}
                           className="bg-red-700 hover:bg-red-600 px-2 py-1 rounded text-xs"
                         >
-                          Reject
+                          Disqualify
                         </button>
                       )}
                     </td>
