@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TournamentsAPIService } from "../../api_services/tournaments/TournamentsAPIService";
 
-const POWERS_OF_TWO = [4, 8, 16, 32, 64, 128, 256];
+const POWERS_OF_TWO = [2, 4, 8, 16, 32, 64, 128, 256];
 
 export default function AdminTournamentEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,8 +42,8 @@ export default function AdminTournamentEditPage() {
   const validate = (): string | null => {
     if (!name || name.length < 3 || name.length > 120) return "Name must be 3–120 characters";
     if (!["single_elimination", "double_elimination", "round_robin"].includes(format)) return "Invalid format";
-    if (maxTeams < 4 || maxTeams > 256) return "Max teams must be between 4 and 256";
-    if (format !== "round_robin" && !POWERS_OF_TWO.includes(maxTeams)) return "Max teams must be power of 2 for elimination formats";
+    if (maxTeams < 2 || maxTeams > 256) return "Max teams must be between 2 and 256";
+    if (!POWERS_OF_TWO.includes(maxTeams)) return "Max teams must be a power of 2 (2, 4, 8, 16, 32...)";
     if (prizePool < 0) return "Prize pool cannot be negative";
     if (!registrationDeadline || !startDate) return "Dates required";
     if (new Date(startDate) <= new Date(registrationDeadline)) return "Start date must be after registration deadline";
@@ -122,7 +122,8 @@ export default function AdminTournamentEditPage() {
 
         <div>
           <div style={{ fontSize: "10px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginBottom: "8px" }}>MAX TEAMS</div>
-          <input type="number" value={maxTeams} onChange={(e) => setMaxTeams(parseInt(e.target.value, 10))} min={4} max={256} required style={inputStyle} />
+          <input type="number" value={maxTeams} onChange={(e) => setMaxTeams(parseInt(e.target.value, 10))} min={2} max={256} required style={inputStyle} />
+          <div style={{ marginTop: "6px", fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>Must be a power of two: 2, 4, 8, 16, 32...</div>
         </div>
 
         <div>

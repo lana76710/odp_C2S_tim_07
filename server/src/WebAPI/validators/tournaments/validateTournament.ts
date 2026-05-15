@@ -20,11 +20,11 @@ export const validateTournament = (
   if (!VALID_FORMATS.includes(format as typeof VALID_FORMATS[number]))
     return { valid: false, message: "Invalid format. Must be: single_elimination, double_elimination or round_robin" };
 
-  if (!Number.isInteger(max_teams) || max_teams < 4 || max_teams > 256)
-    return { valid: false, message: "max_teams must be an integer between 4 and 256" };
+  if (!Number.isInteger(max_teams) || max_teams < 2 || max_teams > 256)
+    return { valid: false, message: "max_teams must be an integer between 2 and 256" };
 
-  if (ELIMINATION_FORMATS.includes(format) && !isPowerOfTwo(max_teams))
-    return { valid: false, message: "max_teams must be a power of 2 for elimination formats (4, 8, 16, 32...)" };
+  if (!isPowerOfTwo(max_teams))
+    return { valid: false, message: "max_teams must be a power of 2 (2, 4, 8, 16, 32...)" };
 
   const deadline = new Date(registration_deadline);
   const start = new Date(start_date);

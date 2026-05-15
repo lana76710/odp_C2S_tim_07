@@ -19,6 +19,8 @@ export default function AdminTournamentCreatePage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const isPowerOfTwo = (n: number) => n > 0 && (n & (n - 1)) === 0;
+
   useEffect(() => {
     setGamesLoading(true);
     gamesApi.getAll()
@@ -36,6 +38,17 @@ export default function AdminTournamentCreatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (name.trim().length < 3) {
+      setError("Tournament name must be at least 3 characters.");
+      return;
+    }
+
+    if (!Number.isInteger(maxTeams) || maxTeams < 2 || maxTeams > 256 || !isPowerOfTwo(maxTeams)) {
+      setError("Max teams must be a power of 2 (2, 4, 8, 16, 32...) and between 2 and 256.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const parsedPrizePool = prizePool.trim() === "" ? undefined : parseFloat(prizePool);
@@ -128,6 +141,7 @@ export default function AdminTournamentCreatePage() {
             min={2}
             className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2"
           />
+          <p className="mt-1 text-xs text-zinc-500">Must be a power of two: 2, 4, 8, 16, 32...</p>
         </div>
 
         <div>

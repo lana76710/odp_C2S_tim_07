@@ -73,8 +73,9 @@ export class TournamentController {
     }
     if (max_teams !== undefined) {
       const mt = Number(max_teams);
-      if (!Number.isInteger(mt) || mt < 4 || mt > 256) {
-        res.status(400).json({ success: false, message: "max_teams must be an integer between 4 and 256" }); return;
+      const isPowerOfTwo = (n: number): boolean => n > 0 && (n & (n - 1)) === 0;
+      if (!Number.isInteger(mt) || mt < 2 || mt > 256 || !isPowerOfTwo(mt)) {
+        res.status(400).json({ success: false, message: "max_teams must be a power of 2 and between 2 and 256" }); return;
       }
     }
     const data = await this.tournamentService.update(id, req.body);
