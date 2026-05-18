@@ -58,7 +58,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.length > 0 ? this.mapMatch(rows[0]) : null;
     } catch (err) {
-      this.logger.error("MatchRepository", "findById failed", err);
+      this.logger.error("MatchRepository", "findById failed", err as Error);
       return null;
     } finally {
       res.conn.release();
@@ -80,7 +80,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.map((row) => this.mapMatch(row));
     } catch (err) {
-      this.logger.error("MatchRepository", "findByTournamentId failed", err);
+      this.logger.error("MatchRepository", "findByTournamentId failed", err as Error);
       return [];
     } finally {
       res.conn.release();
@@ -102,7 +102,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.map((row) => row.team_id);
     } catch (err) {
-      this.logger.error("MatchRepository", "findApprovedTeamIdsByTournamentId failed", err);
+      this.logger.error("MatchRepository", "findApprovedTeamIdsByTournamentId failed", err as Error);
       return [];
     } finally {
       res.conn.release();
@@ -136,7 +136,7 @@ export class MatchRepository implements IMatchRepository {
 
       return this.mapMatch(rows[0]);
     } catch (err) {
-      this.logger.error("MatchRepository", "create failed", err);
+      this.logger.error("MatchRepository", "create failed", err as Error);
       throw err;
     } finally {
       res.conn.release();
@@ -176,7 +176,7 @@ export class MatchRepository implements IMatchRepository {
 
       return this.findById(matchId);
     } catch (err) {
-      this.logger.error("MatchRepository", "updateResult failed", err);
+      this.logger.error("MatchRepository", "updateResult failed", err as Error);
       return null;
     } finally {
       res.conn.release();
@@ -201,7 +201,7 @@ export class MatchRepository implements IMatchRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("MatchRepository", "updateNextMatchTeam failed", err);
+      this.logger.error("MatchRepository", "updateNextMatchTeam failed", err as Error);
       return false;
     } finally {
       res.conn.release();
@@ -232,7 +232,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.length > 0 ? this.mapPlayer(rows[0]) : null;
     } catch (err) {
-      this.logger.error("MatchRepository", "addPlayer failed", err);
+      this.logger.error("MatchRepository", "addPlayer failed", err as Error);
       return null;
     } finally {
       res.conn.release();
@@ -266,7 +266,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.length > 0 ? this.mapPlayer(rows[0]) : null;
     } catch (err) {
-      this.logger.error("MatchRepository", "updatePlayer failed", err);
+      this.logger.error("MatchRepository", "updatePlayer failed", err as Error);
       return null;
     } finally {
       res.conn.release();
@@ -286,7 +286,7 @@ export class MatchRepository implements IMatchRepository {
 
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("MatchRepository", "removePlayer failed", err);
+      this.logger.error("MatchRepository", "removePlayer failed", err as Error);
       return false;
     } finally {
       res.conn.release();
@@ -308,7 +308,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.map((row) => this.mapPlayer(row));
     } catch (err) {
-      this.logger.error("MatchRepository", "findPlayersByMatchId failed", err);
+      this.logger.error("MatchRepository", "findPlayersByMatchId failed", err as Error);
       return [];
     } finally {
       res.conn.release();
@@ -329,7 +329,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("MatchRepository", "isUserTeamCaptain failed", err);
+      this.logger.error("MatchRepository", "isUserTeamCaptain failed", err as Error);
       return false;
     } finally {
       res.conn.release();
@@ -350,7 +350,7 @@ export class MatchRepository implements IMatchRepository {
 
       return rows.length > 0;
     } catch (err) {
-      this.logger.error("MatchRepository", "isUserTeamMember failed", err);
+      this.logger.error("MatchRepository", "isUserTeamMember failed", err as Error);
       return false;
     } finally {
       res.conn.release();

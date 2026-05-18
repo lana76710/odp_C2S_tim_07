@@ -13,7 +13,7 @@ export class GameRepository implements IGameRepository {
   ) {}
 
   private map(r: RowDataPacket): GameDto {
-    const parseTournaments = (value: unknown): { id: number; name: string; status: string }[] =>
+    const parseTournaments = (value: string | null): { id: number; name: string; status: string }[] =>
       value
       ? String(value)
           .split("||")
@@ -66,7 +66,7 @@ export class GameRepository implements IGameRepository {
       );
       return rows.map((r) => this.map(r));
     } catch (err) {
-      this.logger.error("GameRepository", "findAll failed", err);
+      this.logger.error("GameRepository", "findAll failed", err as Error);
       return [];
     } finally { res.conn.release(); }
   }
@@ -98,7 +98,7 @@ export class GameRepository implements IGameRepository {
       );
       return rows.length > 0 ? this.map(rows[0]) : null;
     } catch (err) {
-      this.logger.error("GameRepository", "findById failed", err);
+      this.logger.error("GameRepository", "findById failed", err as Error);
       return null;
     } finally { res.conn.release(); }
   }
@@ -114,7 +114,7 @@ export class GameRepository implements IGameRepository {
       if (result.insertId === 0) return new Game();
       return new Game(result.insertId, dto.name, dto.logo, dto.genre, dto.max_players_per_team);
     } catch (err) {
-      this.logger.error("GameRepository", "create failed", err);
+      this.logger.error("GameRepository", "create failed", err as Error);
       return new Game();
     } finally { res.conn.release(); }
   }
@@ -133,7 +133,7 @@ export class GameRepository implements IGameRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("GameRepository", "update failed", err);
+      this.logger.error("GameRepository", "update failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }
@@ -148,7 +148,7 @@ export class GameRepository implements IGameRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("GameRepository", "delete failed", err);
+      this.logger.error("GameRepository", "delete failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }
@@ -163,7 +163,7 @@ export class GameRepository implements IGameRepository {
       );
       return rows[0].cnt > 0;
     } catch (err) {
-      this.logger.error("GameRepository", "hasTournaments failed", err);
+      this.logger.error("GameRepository", "hasTournaments failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }

@@ -32,7 +32,7 @@ export class AuditLogRepository implements IAuditLogRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(sql);
       return rows.map((r) => this.map(r));
     } catch (err) {
-      this.logger.error("AuditLogRepository", "findAll failed", err);
+      this.logger.error("AuditLogRepository", "findAll failed", err as Error);
       return [];
     } finally { res.conn.release(); }
   }
@@ -46,7 +46,7 @@ export class AuditLogRepository implements IAuditLogRepository {
       );
       return rows[0].cnt;
     } catch (err) {
-      this.logger.error("AuditLogRepository", "countAll failed", err);
+      this.logger.error("AuditLogRepository", "countAll failed", err as Error);
       return 0;
     } finally { res.conn.release(); }
   }
@@ -70,7 +70,7 @@ export class AuditLogRepository implements IAuditLogRepository {
       }
       return true;
     } catch (err) {
-      this.logger.error("AuditLogRepository", "create failed", err);
+      this.logger.error("AuditLogRepository", "create failed", err as Error);
       throw err;
     } finally { res.conn.release(); }
   }

@@ -50,7 +50,7 @@ export class TournamentRepository implements ITournamentRepository {
       const [rows] = await res.conn.execute<RowDataPacket[]>(query, params);
       return rows.map((r) => this.map(r));
     } catch (err) {
-      this.logger.error("TournamentRepository", "findAll failed", err);
+      this.logger.error("TournamentRepository", "findAll failed", err as Error);
       return [];
     } finally { res.conn.release(); }
   }
@@ -64,7 +64,7 @@ export class TournamentRepository implements ITournamentRepository {
       );
       return rows.length > 0 ? this.map(rows[0]) : null;
     } catch (err) {
-      this.logger.error("TournamentRepository", "findById failed", err);
+      this.logger.error("TournamentRepository", "findById failed", err as Error);
       return null;
     } finally { res.conn.release(); }
   }
@@ -90,7 +90,7 @@ export class TournamentRepository implements ITournamentRepository {
       if (rows.length === 0) throw new Error("Failed to fetch created tournament");
       return this.map(rows[0]);
     } catch (err) {
-      this.logger.error("TournamentRepository", "create failed", err);
+      this.logger.error("TournamentRepository", "create failed", err as Error);
       throw err;
     } finally { res.conn.release(); }
   }
@@ -124,7 +124,7 @@ export class TournamentRepository implements ITournamentRepository {
       );
       return this.findById(id);
     } catch (err) {
-      this.logger.error("TournamentRepository", "update failed", err);
+      this.logger.error("TournamentRepository", "update failed", err as Error);
       return null;
     } finally { res.conn.release(); }
   }
@@ -138,7 +138,7 @@ export class TournamentRepository implements ITournamentRepository {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("TournamentRepository", "delete failed", err);
+      this.logger.error("TournamentRepository", "delete failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }

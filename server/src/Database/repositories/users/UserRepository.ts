@@ -26,7 +26,7 @@ async create(user: User): Promise<User> {
     if (result.insertId === 0) return new User();
     return new User(result.insertId, user.gamer_tag, user.full_name, user.email, user.role, user.password_hash, user.profile_image ?? null);
   } catch (err) {
-    this.logger.error("UserRepository", "create failed", err);
+    this.logger.error("UserRepository", "create failed", err as Error);
     return new User();
   } finally { res.conn.release(); }
 }
@@ -38,7 +38,7 @@ async create(user: User): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ?`, [id]);
       return rows.length > 0 ? this.map(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findById failed", err);
+      this.logger.error("UserRepository", "findById failed", err as Error);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -50,7 +50,7 @@ async create(user: User): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ?`, [username]);
       return rows.length > 0 ? this.map(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findByUsername failed", err);
+      this.logger.error("UserRepository", "findByUsername failed", err as Error);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -62,7 +62,7 @@ async create(user: User): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ?`, [email]);
       return rows.length > 0 ? this.map(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findByEmail failed", err);
+      this.logger.error("UserRepository", "findByEmail failed", err as Error);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -74,7 +74,7 @@ async create(user: User): Promise<User> {
       const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users ORDER BY id ASC`);
       return rows.map((r) => this.map(r));
     } catch (err) {
-      this.logger.error("UserRepository", "findAll failed", err);
+      this.logger.error("UserRepository", "findAll failed", err as Error);
       return [];
     } finally { res.conn.release(); }
   }
@@ -89,7 +89,7 @@ async create(user: User): Promise<User> {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "update failed", err);
+      this.logger.error("UserRepository", "update failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }
@@ -103,7 +103,7 @@ async create(user: User): Promise<User> {
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "deactivate failed", err);
+      this.logger.error("UserRepository", "deactivate failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }
@@ -117,7 +117,7 @@ async create(user: User): Promise<User> {
       );
       return (rows[0]?.cnt ?? 0) > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "exists failed", err);
+      this.logger.error("UserRepository", "exists failed", err as Error);
       return false;
     } finally { res.conn.release(); }
   }
@@ -131,7 +131,7 @@ async create(user: User): Promise<User> {
       );
       return rows.length > 0 ? this.map(rows[0]) : new User();
     } catch (err) {
-      this.logger.error("UserRepository", "findByGamerTag failed", err);
+      this.logger.error("UserRepository", "findByGamerTag failed", err as Error);
       return new User();
     } finally { res.conn.release(); }
   }
@@ -146,7 +146,7 @@ async searchByGamerTag(query: string): Promise<User[]> {
     );
     return rows.map((r) => this.map(r));
   } catch (err) {
-    this.logger.error("UserRepository", "searchByGamerTag failed", err);
+    this.logger.error("UserRepository", "searchByGamerTag failed", err as Error);
     return [];
   } finally { res.conn.release(); }
 }
@@ -168,7 +168,7 @@ async updateProfile(id: number, data: { full_name?: string; profile_image?: stri
     );
     return result.affectedRows > 0;
   } catch (err) {
-    this.logger.error("UserRepository", "updateProfile failed", err);
+    this.logger.error("UserRepository", "updateProfile failed", err as Error);
     return false;
   } finally { res.conn.release(); }
 }
@@ -182,7 +182,7 @@ async changeRole(id: number, role: UserRole): Promise<boolean> {
     );
     return result.affectedRows > 0;
   } catch (err) {
-    this.logger.error("UserRepository", "changeRole failed", err);
+    this.logger.error("UserRepository", "changeRole failed", err as Error);
     return false;
   } finally { res.conn.release(); }
 }

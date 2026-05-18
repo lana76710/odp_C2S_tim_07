@@ -89,10 +89,10 @@ export class DbManager {
     this.healthTimer = setInterval(() => void this.runHealthCheck(), HEALTH_CHECK_INTERVAL_MS);
   }
 
-  /** All writes (INSERT/UPDATE/DELETE) → Master only */
+  /** All writes (INSERT/UPDATE/DELETE) â†’ Master only */
   public async getWriteConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
     if (this.master.node.status === NodeStatus.OFFLINE) {
-      this.logger.error("DB", "Master is OFFLINE — write not possible");
+      this.logger.error("DB", "Master is OFFLINE â€” write not possible");
       return null;
     }
     try {
@@ -102,12 +102,12 @@ export class DbManager {
     } catch (err) {
       this.master.node.status = NodeStatus.OFFLINE;
       this.master.node.failedWrites++;
-      this.logger.error("DB", "Failed to connect to master", err);
+      this.logger.error("DB", "Failed to connect to master", err as Error);
       return null;
     }
   }
 
-  /** All reads (SELECT) → Round-Robin slaves, fallback to Master */
+  /** All reads (SELECT) â†’ Round-Robin slaves, fallback to Master */
   public async getReadConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
     const n = this.slaves.length;
     for (let i = 0; i < n; i++) {
@@ -126,13 +126,13 @@ export class DbManager {
       }
     }
     // Fallback to master
-    this.logger.warn("DB", "All slaves offline — falling back to master for read");
+    this.logger.warn("DB", "All slaves offline â€” falling back to master for read");
     return this.getMasterConnection();
   }
 
   public async getMasterConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
     if (this.master.node.status === NodeStatus.OFFLINE) {
-      this.logger.error("DB", "Master is OFFLINE — read not possible");
+      this.logger.error("DB", "Master is OFFLINE â€” read not possible");
       return null;
     }
     try {
@@ -142,7 +142,7 @@ export class DbManager {
     } catch (err) {
       this.master.node.status = NodeStatus.OFFLINE;
       this.master.node.failedWrites++;
-      this.logger.error("DB", "Failed to connect to master for fallback read", err);
+      this.logger.error("DB", "Failed to connect to master for fallback read", err as Error);
       return null;
     }
   }
