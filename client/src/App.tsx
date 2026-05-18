@@ -35,19 +35,19 @@ export default function App() {
 
       <Route path="/games" element={<GamesPage />} />
 
-      {/* Tournaments */}
+      {/* Tournaments — public (guest can view) */}
       <Route path="/tournaments" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowGuest>
           <TournamentsPage />
         </ProtectedRoute>
       } />
       <Route path="/tournaments/:id" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowGuest>
           <TournamentDetailsPage />
         </ProtectedRoute>
       } />
       <Route path="/tournaments/:id/bracket" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowGuest>
           <TournamentBracketPage />
         </ProtectedRoute>
       } />
